@@ -13,6 +13,6 @@ export type CountryActionState = {
 }
 
 export type CountryListParams = {
-  q: string
+  search: string
   page: number
 }

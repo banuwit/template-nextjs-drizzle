@@ -26,7 +26,7 @@ No test runner is configured — there are no test files, no test dependency, an
 
 ## State of the repo
 
-This is a **starter template**. Ada empat referensi CRUD — pilih **salah satu**, jangan dicampur. Sebelum scaffold CRUD baru: baca [.agents/rules/crud-pages.md](.agents/rules/crud-pages.md) dan **tanya** keempat opsi (jangan mengasumsikan). Checklist langkah demi langkah: [.agents/rules/new-page-guidelines.md](.agents/rules/new-page-guidelines.md). Penjelasan UX: [crud-pattern-laravel.md](crud-pattern-laravel.md).
+This is a **starter template**. Ada empat referensi CRUD — pilih **salah satu**, jangan dicampur. Sebelum scaffold CRUD baru: baca [.agents/rules/crud-pattern.md](.agents/rules/crud-pattern.md) dan **tanya** keempat opsi (jangan mengasumsikan). Checklist langkah demi langkah: [.agents/rules/new-page-guidelines.md](.agents/rules/new-page-guidelines.md). Penjelasan UX: [crud-pattern-laravel.md](crud-pattern-laravel.md).
 
 - **`src/app/users/`** — CRUD multi-halaman (list / new / `[id]` / `[id]/edit`). Pakai ini kalau create/view/edit butuh URL sendiri.
 - **`src/app/countries/`** — CRUD satu halaman; create/view/edit di Dialog, hapus di AlertDialog. Sukses mutasi: `revalidatePath` + `{ ok: true }`, **tanpa** `redirect()`.

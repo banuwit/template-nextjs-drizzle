@@ -18,11 +18,14 @@ export const dynamic = "force-dynamic"
 export default async function CountriesPage({
   searchParams,
 }: PageProps<"/countries">) {
-  const { q, page } = parseCountryListParams(await searchParams)
-  const { rows, total, pageCount, offset } = await listCountries({ q, page })
+  const { search, page } = parseCountryListParams(await searchParams)
+  const { rows, total, pageCount, offset } = await listCountries({
+    search,
+    page,
+  })
 
   if (page > pageCount) {
-    redirect(buildCountriesHref({ q, page: pageCount }))
+    redirect(buildCountriesHref({ search, page: pageCount }))
   }
 
   return (
@@ -32,17 +35,17 @@ export default async function CountriesPage({
           countries={rows}
           offset={offset}
           emptyMessage={
-            q
-              ? `Tidak ada negara yang cocok dengan "${q}".`
+            search
+              ? `Tidak ada negara yang cocok dengan "${search}".`
               : "Belum ada negara."
           }
-          search={<CountrySearchForm q={q} />}
+          search={<CountrySearchForm search={search} />}
           pagination={
             <CountryPagination
               page={page}
               pageCount={pageCount}
               total={total}
-              q={q}
+              search={search}
             />
           }
         />

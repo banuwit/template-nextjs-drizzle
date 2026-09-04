@@ -1,13 +1,23 @@
 import "server-only"
 
 import { cache } from "react"
-import { count, desc, eq, ilike, or, type SQL } from "drizzle-orm"
+import {
+  asc,
+  count,
+  desc,
+  eq,
+  ilike,
+  or,
+  type AnyColumn,
+  type SQL,
+} from "drizzle-orm"
 
 import { db } from "@/db"
 import { users, type User } from "@/db/schema"
+import { paginate } from "@/lib/pagination"
+import type { Paginated } from "@/types/pagination"
 
-import type { UserListParams } from "./types"
-import { USERS_PAGE_SIZE } from "./utils"
+import type { UserListParams, UserSortColumn } from "./types"
 
 /** Ambil satu user; `undefined` kalau id bukan angka atau baris tidak ada. */
 export const getUserById = cache(
@@ -24,41 +34,44 @@ export const getUserById = cache(
   }
 )
 
-export type UserListResult = {
-  rows: User[]
-  total: number
-  pageCount: number
-  offset: number
+/**
+ * Kolom yang boleh dipakai untuk sort, dipetakan ke kolom Drizzle-nya.
+ * Diketik sebagai `Record<UserSortColumn, AnyColumn>` supaya kolom yang lupa
+ * ditambah ke sini (setelah `USER_SORT_COLUMNS` di `types/index.ts` diperluas)
+ * langsung ketahuan di typecheck, bukan diam-diam diabaikan saat runtime.
+ */
+const sortable: Record<UserSortColumn, AnyColumn> = {
+  name: users.name,
+  email: users.email,
+  created_at: users.createdAt,
 }
 
-/** Satu halaman user beserta total baris, untuk tabel + pagination. */
+/** Satu halaman user, untuk `DataGridServer`. */
 export async function listUsers({
-  q,
+  search,
   page,
-}: UserListParams): Promise<UserListResult> {
-  const where: SQL | undefined = q
-    ? or(ilike(users.name, `%${q}%`), ilike(users.email, `%${q}%`))
+  sort,
+  direction,
+  perPage,
+}: UserListParams): Promise<Paginated<User>> {
+  const where: SQL | undefined = search
+    ? or(ilike(users.name, `%${search}%`), ilike(users.email, `%${search}%`))
     : undefined
 
-  const offset = (page - 1) * USERS_PAGE_SIZE
+  const column = sortable[sort]
+  const order = direction === "asc" ? asc(column) : desc(column)
 
   const [rows, [totals]] = await Promise.all([
     db
       .select()
       .from(users)
       .where(where)
-      .orderBy(desc(users.createdAt), desc(users.id))
-      .limit(USERS_PAGE_SIZE)
-      .offset(offset),
+      // Tie-breaker menjaga urutan tetap stabil saat nilai kolom sort sama.
+      .orderBy(order, desc(users.id))
+      .limit(perPage)
+      .offset((page - 1) * perPage),
     db.select({ value: count() }).from(users).where(where),
   ])
 
-  const total = totals?.value ?? 0
-
-  return {
-    rows,
-    total,
-    pageCount: Math.max(1, Math.ceil(total / USERS_PAGE_SIZE)),
-    offset,
-  }
+  return paginate({ rows, total: totals?.value ?? 0, page, perPage })
 }

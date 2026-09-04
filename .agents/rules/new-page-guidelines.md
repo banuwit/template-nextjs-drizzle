@@ -15,7 +15,7 @@ Dokumen ini adalah **checklist umum & reusable** untuk membuat resource baru (ta
 
 Struktur penjelasan mengikuti [new-pages-pattern.md](../../new-pages-pattern.md) (urutan kerja + trap + referensi kanonik). **Implementasi di repo ini adalah Next.js 16 + Drizzle + PostgreSQL**, bukan Laravel/Inertia — jangan copy Artisan, Wayfinder, Policy, atau Pest.
 
-Untuk **empat varian UI** create/edit/view (Halaman baru, Dialog, Sheet, Panel inline), kontrak form, dan mode view: lihat [crud-pages.md](./crud-pages.md). Dokumen ini **tidak menduplikasi** isi itu — hanya urutan kerja + penjelasan tiap langkah + trap. **Selalu tanya dulu** keempat opsi sebelum scaffold create/edit/view.
+Untuk **empat varian UI** create/edit/view (Halaman baru, Dialog, Sheet, Panel inline), kontrak form, dan mode view: lihat [crud-pattern.md](./crud-pattern.md). Dokumen ini **tidak menduplikasi** isi itu — hanya urutan kerja + penjelasan tiap langkah + trap. **Selalu tanya dulu** keempat opsi sebelum scaffold create/edit/view.
 
 Setup data layer (Pool, `drizzle.config.ts`, cara `generate`/`migrate`): [drizzle-setup.md](./drizzle-setup.md). Tata folder: [structure-folder-codebase.md](./structure-folder-codebase.md).
 
@@ -27,7 +27,7 @@ Kerjakan berurutan. Jangan mulai UI sebelum schema ter-export dan migrasi sudah 
 
 ### 0. Tanya varian UI
 
-Tawarkan empat opsi di [crud-pages.md](./crud-pages.md). Jangan mulai `new/`, `[id]/`, Dialog, Sheet, atau panel sampai ada jawaban — kecuali user sudah memilih di permintaan yang sama.
+Tawarkan empat opsi di [crud-pattern.md](./crud-pattern.md). Jangan mulai `new/`, `[id]/`, Dialog, Sheet, atau panel sampai ada jawaban — kecuali user sudah memilih di permintaan yang sama.
 
 Delete selalu `AlertDialog` di list, terlepas dari pilihan itu.
 

@@ -17,7 +17,7 @@ export function CityWorkspace({
   cities,
   offset,
   emptyMessage,
-  q,
+  search,
   page,
   pageCount,
   total,
@@ -25,7 +25,7 @@ export function CityWorkspace({
   cities: City[]
   offset: number
   emptyMessage: string
-  q: string
+  search: string
   page: number
   pageCount: number
   total: number
@@ -52,7 +52,7 @@ export function CityWorkspace({
 
         <Card className="gap-0 overflow-hidden py-0">
           <CardContent className="flex flex-col gap-4 p-4">
-            <CitySearchForm q={q} />
+            <CitySearchForm search={search} />
             <CityListTable
               cities={cities}
               offset={offset}
@@ -64,7 +64,7 @@ export function CityWorkspace({
               page={page}
               pageCount={pageCount}
               total={total}
-              q={q}
+              search={search}
             />
           </CardContent>
         </Card>

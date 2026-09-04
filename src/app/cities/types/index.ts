@@ -13,6 +13,6 @@ export type CityActionState = {
 }
 
 export type CityListParams = {
-  q: string
+  search: string
   page: number
 }

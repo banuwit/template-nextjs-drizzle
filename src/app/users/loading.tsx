@@ -18,7 +18,10 @@ export default function UsersLoading() {
 
         <Card className="gap-0 overflow-hidden py-0">
           <CardContent className="flex flex-col gap-4 p-4">
-            <Skeleton className="h-9 w-full max-w-sm" />
+            <div className="flex items-center justify-between gap-2">
+              <Skeleton className="h-9 w-full max-w-sm" />
+              <Skeleton className="h-8 w-20" />
+            </div>
             <Skeleton className="h-64 w-full" />
             <Skeleton className="h-8 w-full" />
           </CardContent>

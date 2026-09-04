@@ -5,12 +5,11 @@ import { PlusIcon } from "lucide-react"
 
 import Heading from "@/components/heading"
 import { AppLayout } from "@/components/layouts/app-layout"
+import type { DataGridFilters } from "@/components/data-grid/types"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
-import { UserPagination } from "./components/user-pagination"
-import { UserSearchForm } from "./components/user-search-form"
-import { UserTable } from "./components/user-table"
+import { UserGrid } from "./components/user-grid"
 import { listUsers } from "./queries"
 import { buildUsersHref, parseUserListParams } from "./utils"
 
@@ -22,11 +21,25 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic"
 
 export default async function UsersPage({ searchParams }: PageProps<"/users">) {
-  const { q, page } = parseUserListParams(await searchParams)
-  const { rows, total, pageCount, offset } = await listUsers({ q, page })
+  const listParams = parseUserListParams(await searchParams)
+  const paginated = await listUsers(listParams)
 
-  if (page > pageCount) {
-    redirect(buildUsersHref({ q, page: pageCount }))
+  if (listParams.page > paginated.last_page) {
+    redirect(buildUsersHref({ ...listParams, page: paginated.last_page }))
+  }
+
+  // `DataGridServer` menampilkan panah sort dari `filters.sort` /
+  // `filters.direction` apa adanya — kalau dioper raw searchParams, kunjungan
+  // pertama tanpa `?sort=` di URL tidak menunjukkan panah pada kolom "Dibuat"
+  // meski datanya memang sudah terurut begitu. Jadi yang dioper ke sini
+  // adalah filter yang **sudah di-resolve** (whitelist + default terisi),
+  // sama seperti kontrak "resolved filters" yang didokumentasikan di
+  // `DataGridServerProps.filters`.
+  const filters: DataGridFilters = {
+    search: listParams.search,
+    sort: listParams.sort,
+    direction: listParams.direction,
+    per_page: String(listParams.perPage),
   }
 
   return (
@@ -46,22 +59,7 @@ export default async function UsersPage({ searchParams }: PageProps<"/users">) {
 
         <Card className="gap-0 overflow-hidden py-0">
           <CardContent className="flex flex-col gap-4 p-4">
-            <UserSearchForm q={q} />
-            <UserTable
-              users={rows}
-              offset={offset}
-              emptyMessage={
-                q
-                  ? `Tidak ada user yang cocok dengan "${q}".`
-                  : "Belum ada user."
-              }
-            />
-            <UserPagination
-              page={page}
-              pageCount={pageCount}
-              total={total}
-              q={q}
-            />
+            <UserGrid paginated={paginated} filters={filters} />
           </CardContent>
         </Card>
       </div>

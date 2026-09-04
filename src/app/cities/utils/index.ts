@@ -5,20 +5,21 @@ export const CITIES_PAGE_SIZE = 10
 export function parseCityListParams(searchParams: {
   [key: string]: string | string[] | undefined
 }): CityListParams {
-  const q = typeof searchParams.q === "string" ? searchParams.q.trim() : ""
+  const search =
+    typeof searchParams.search === "string" ? searchParams.search.trim() : ""
   const requestedPage = Number(
     typeof searchParams.page === "string" ? searchParams.page : "1"
   )
   const page =
     Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1
 
-  return { q, page }
+  return { search, page }
 }
 
-export function buildCitiesHref({ page, q }: CityListParams): string {
+export function buildCitiesHref({ page, search }: CityListParams): string {
   const params = new URLSearchParams()
 
-  if (q) params.set("q", q)
+  if (search) params.set("search", search)
   if (page > 1) params.set("page", String(page))
 
   const query = params.toString()

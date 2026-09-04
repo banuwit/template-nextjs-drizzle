@@ -16,11 +16,14 @@ export const dynamic = "force-dynamic"
 export default async function CitiesPage({
   searchParams,
 }: PageProps<"/cities">) {
-  const { q, page } = parseCityListParams(await searchParams)
-  const { rows, total, pageCount, offset } = await listCities({ q, page })
+  const { search, page } = parseCityListParams(await searchParams)
+  const { rows, total, pageCount, offset } = await listCities({
+    search,
+    page,
+  })
 
   if (page > pageCount) {
-    redirect(buildCitiesHref({ q, page: pageCount }))
+    redirect(buildCitiesHref({ search, page: pageCount }))
   }
 
   return (
@@ -30,11 +33,11 @@ export default async function CitiesPage({
           cities={rows}
           offset={offset}
           emptyMessage={
-            q
-              ? `Tidak ada kota yang cocok dengan "${q}".`
+            search
+              ? `Tidak ada kota yang cocok dengan "${search}".`
               : "Belum ada kota."
           }
-          q={q}
+          search={search}
           page={page}
           pageCount={pageCount}
           total={total}

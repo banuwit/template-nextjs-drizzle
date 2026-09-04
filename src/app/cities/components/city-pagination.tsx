@@ -40,12 +40,12 @@ export function CityPagination({
   page,
   pageCount,
   total,
-  q,
+  search,
 }: {
   page: number
   pageCount: number
   total: number
-  q: string
+  search: string
 }) {
   return (
     <div className="flex items-center justify-between gap-4">
@@ -54,13 +54,13 @@ export function CityPagination({
       </p>
       <div className="flex items-center gap-2">
         <PageNavButton
-          href={buildCitiesHref({ page: page - 1, q })}
+          href={buildCitiesHref({ page: page - 1, search })}
           disabled={page <= 1}
         >
           Sebelumnya
         </PageNavButton>
         <PageNavButton
-          href={buildCitiesHref({ page: page + 1, q })}
+          href={buildCitiesHref({ page: page + 1, search })}
           disabled={page >= pageCount}
         >
           Berikutnya

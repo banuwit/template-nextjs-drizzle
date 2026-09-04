@@ -18,11 +18,14 @@ export const dynamic = "force-dynamic"
 export default async function ProvincesPage({
   searchParams,
 }: PageProps<"/provinces">) {
-  const { q, page } = parseProvinceListParams(await searchParams)
-  const { rows, total, pageCount, offset } = await listProvinces({ q, page })
+  const { search, page } = parseProvinceListParams(await searchParams)
+  const { rows, total, pageCount, offset } = await listProvinces({
+    search,
+    page,
+  })
 
   if (page > pageCount) {
-    redirect(buildProvincesHref({ q, page: pageCount }))
+    redirect(buildProvincesHref({ search, page: pageCount }))
   }
 
   return (
@@ -32,17 +35,17 @@ export default async function ProvincesPage({
           provinces={rows}
           offset={offset}
           emptyMessage={
-            q
-              ? `Tidak ada provinsi yang cocok dengan "${q}".`
+            search
+              ? `Tidak ada provinsi yang cocok dengan "${search}".`
               : "Belum ada provinsi."
           }
-          search={<ProvinceSearchForm q={q} />}
+          search={<ProvinceSearchForm search={search} />}
           pagination={
             <ProvincePagination
               page={page}
               pageCount={pageCount}
               total={total}
-              q={q}
+              search={search}
             />
           }
         />

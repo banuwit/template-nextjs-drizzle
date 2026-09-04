@@ -23,8 +23,21 @@ export type UserActionState = {
   values?: UserFormFields
 }
 
-/** Query string halaman list user (`?q=&page=`) setelah dibersihkan. */
+/**
+ * Kolom yang boleh dipakai untuk sort list user. Satu-satunya sumber
+ * kebenaran: `parseUserListParams` mem-whitelist query string terhadap array
+ * ini, dan `queries.ts` mengetik map kolomnya sebagai `Record<UserSortColumn, ...>`
+ * supaya kolom yang lupa ditambah ke map langsung ketahuan di typecheck.
+ */
+export const USER_SORT_COLUMNS = ["name", "email", "created_at"] as const
+
+export type UserSortColumn = (typeof USER_SORT_COLUMNS)[number]
+
+/** Query string halaman list user setelah dibersihkan dan di-whitelist. */
 export type UserListParams = {
-  q: string
+  search: string
   page: number
+  sort: UserSortColumn
+  direction: "asc" | "desc"
+  perPage: number
 }

@@ -16,11 +16,14 @@ export type CountryListResult = {
 }
 
 export async function listCountries({
-  q,
+  search,
   page,
 }: CountryListParams): Promise<CountryListResult> {
-  const where: SQL | undefined = q
-    ? or(ilike(countries.name, `%${q}%`), ilike(countries.code, `%${q}%`))
+  const where: SQL | undefined = search
+    ? or(
+        ilike(countries.name, `%${search}%`),
+        ilike(countries.code, `%${search}%`)
+      )
     : undefined
 
   const offset = (page - 1) * COUNTRIES_PAGE_SIZE

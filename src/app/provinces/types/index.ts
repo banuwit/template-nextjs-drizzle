@@ -13,6 +13,6 @@ export type ProvinceActionState = {
 }
 
 export type ProvinceListParams = {
-  q: string
+  search: string
   page: number
 }
