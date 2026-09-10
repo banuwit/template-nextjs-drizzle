@@ -11,8 +11,3 @@ export type CountryActionState = {
   values?: CountryFormFields
   ok?: boolean
 }
-
-export type CountryListParams = {
-  search: string
-  page: number
-}

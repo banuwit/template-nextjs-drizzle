@@ -8,67 +8,70 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import type { City } from "@/db/schema"
 
+import { CityFormDialog } from "./city-form-dialog"
 import { CityListTable } from "./city-list-table"
-import { CityPagination } from "./city-pagination"
-import { CitySearchForm } from "./city-search-form"
-import { CitySheets, type CitySheet } from "./city-sheets"
+import { CityViewDialog } from "./city-view-dialog"
+
+type DialogMode = "create" | "view" | "edit" | null
 
 export function CityWorkspace({
   cities,
-  offset,
-  emptyMessage,
-  search,
-  page,
-  pageCount,
-  total,
 }: {
   cities: City[]
-  offset: number
-  emptyMessage: string
-  search: string
-  page: number
-  pageCount: number
-  total: number
 }) {
-  const [sheet, setSheet] = useState<CitySheet>({ type: "closed" })
+  const [mode, setMode] = useState<DialogMode>(null)
+  const [selected, setSelected] = useState<City>()
+
+  function close() {
+    setMode(null)
+    setSelected(undefined)
+  }
 
   return (
-    <CitySheets sheet={sheet} onSheetChange={setSheet}>
-      <div className="flex min-h-0 flex-1 flex-col gap-6 p-4">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <Heading
-            variant="small"
-            title="Cities"
-            description="Kelola kota yang tersedia di workspace ini."
-          />
-          <Button
-            type="button"
-            onClick={() => setSheet({ type: "create" })}
-          >
-            <PlusIcon data-icon="inline-start" />
-            Kota baru
-          </Button>
-        </div>
-
-        <Card className="gap-0 overflow-hidden py-0">
-          <CardContent className="flex flex-col gap-4 p-4">
-            <CitySearchForm search={search} />
-            <CityListTable
-              cities={cities}
-              offset={offset}
-              emptyMessage={emptyMessage}
-              onView={(city) => setSheet({ type: "view", city })}
-              onEdit={(city) => setSheet({ type: "edit", city })}
-            />
-            <CityPagination
-              page={page}
-              pageCount={pageCount}
-              total={total}
-              search={search}
-            />
-          </CardContent>
-        </Card>
+    <>
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <Heading
+          variant="small"
+          title="Cities"
+          description="Kelola kota yang tersedia di workspace ini."
+        />
+        <Button
+          type="button"
+          onClick={() => {
+            setSelected(undefined)
+            setMode("create")
+          }}
+        >
+          <PlusIcon data-icon="inline-start" />
+          Kota baru
+        </Button>
       </div>
-    </CitySheets>
+
+      <Card className="gap-0 overflow-hidden py-0">
+        <CardContent className="flex flex-col gap-4 p-4">
+          <CityListTable
+            cities={cities}
+            onView={(city) => {
+              setSelected(city)
+              setMode("view")
+            }}
+            onEdit={(city) => {
+              setSelected(city)
+              setMode("edit")
+            }}
+          />
+        </CardContent>
+      </Card>
+
+      {mode === "create" ? (
+        <CityFormDialog mode="create" onClose={close} />
+      ) : null}
+      {mode === "edit" && selected ? (
+        <CityFormDialog mode="edit" city={selected} onClose={close} />
+      ) : null}
+      {mode === "view" && selected ? (
+        <CityViewDialog city={selected} onClose={close} />
+      ) : null}
+    </>
   )
 }

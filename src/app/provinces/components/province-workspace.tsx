@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, type ReactNode } from "react"
+import { useState } from "react"
 import { PlusIcon } from "lucide-react"
 
 import Heading from "@/components/heading"
@@ -8,26 +8,18 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import type { Province } from "@/db/schema"
 
-import { ProvinceFormSheet } from "./province-form-sheet"
-import { ProvinceTable } from "./province-table"
-import { ProvinceViewSheet } from "./province-view-sheet"
+import { ProvinceFormDialog } from "./province-form-dialog"
+import { ProvinceListTable } from "./province-list-table"
+import { ProvinceViewDialog } from "./province-view-dialog"
 
-type SheetMode = "create" | "view" | "edit" | null
+type DialogMode = "create" | "view" | "edit" | null
 
 export function ProvinceWorkspace({
   provinces,
-  offset,
-  emptyMessage,
-  search,
-  pagination,
 }: {
   provinces: Province[]
-  offset: number
-  emptyMessage: string
-  search: ReactNode
-  pagination: ReactNode
 }) {
-  const [mode, setMode] = useState<SheetMode>(null)
+  const [mode, setMode] = useState<DialogMode>(null)
   const [selected, setSelected] = useState<Province>()
 
   function close() {
@@ -57,11 +49,8 @@ export function ProvinceWorkspace({
 
       <Card className="gap-0 overflow-hidden py-0">
         <CardContent className="flex flex-col gap-4 p-4">
-          {search}
-          <ProvinceTable
+          <ProvinceListTable
             provinces={provinces}
-            offset={offset}
-            emptyMessage={emptyMessage}
             onView={(province) => {
               setSelected(province)
               setMode("view")
@@ -71,18 +60,17 @@ export function ProvinceWorkspace({
               setMode("edit")
             }}
           />
-          {pagination}
         </CardContent>
       </Card>
 
       {mode === "create" ? (
-        <ProvinceFormSheet mode="create" onClose={close} />
+        <ProvinceFormDialog mode="create" onClose={close} />
       ) : null}
       {mode === "edit" && selected ? (
-        <ProvinceFormSheet mode="edit" province={selected} onClose={close} />
+        <ProvinceFormDialog mode="edit" province={selected} onClose={close} />
       ) : null}
       {mode === "view" && selected ? (
-        <ProvinceViewSheet province={selected} onClose={close} />
+        <ProvinceViewDialog province={selected} onClose={close} />
       ) : null}
     </>
   )

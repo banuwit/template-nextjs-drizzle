@@ -11,8 +11,3 @@ export type ProvinceActionState = {
   values?: ProvinceFormFields
   ok?: boolean
 }
-
-export type ProvinceListParams = {
-  search: string
-  page: number
-}

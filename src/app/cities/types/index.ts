@@ -11,8 +11,3 @@ export type CityActionState = {
   values?: CityFormFields
   ok?: boolean
 }
-
-export type CityListParams = {
-  search: string
-  page: number
-}

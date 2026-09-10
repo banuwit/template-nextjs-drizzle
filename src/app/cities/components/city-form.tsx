@@ -16,8 +16,6 @@ import { toFieldErrors } from "@/lib/form"
 
 import type { CityActionState, CityFormFields } from "../types"
 
-import { CitySidePanelBody, CitySidePanelFooter } from "./city-side-panel"
-
 export function CityForm({
   action,
   defaultValues,
@@ -58,42 +56,40 @@ export function CityForm({
   const codeErrors = state.errors?.code
 
   return (
-    <form action={formAction} className="flex min-h-0 flex-1 flex-col">
-      <CitySidePanelBody className="flex flex-col gap-6">
-        <FieldGroup>
-          <Field data-invalid={nameErrors ? true : undefined}>
-            <FieldLabel htmlFor="city-name">Nama</FieldLabel>
-            <Input
-              id="city-name"
-              name="name"
-              placeholder="Bandung"
-              autoComplete="off"
-              aria-invalid={nameErrors ? true : undefined}
-              defaultValue={state.values?.name ?? defaultValues?.name}
-            />
-            <FieldError errors={toFieldErrors(nameErrors)} />
-          </Field>
+    <form action={formAction} className="flex flex-col gap-6">
+      <FieldGroup>
+        <Field data-invalid={nameErrors ? true : undefined}>
+          <FieldLabel htmlFor="city-name">Nama</FieldLabel>
+          <Input
+            id="city-name"
+            name="name"
+            placeholder="Bandung"
+            autoComplete="off"
+            aria-invalid={nameErrors ? true : undefined}
+            defaultValue={state.values?.name ?? defaultValues?.name}
+          />
+          <FieldError errors={toFieldErrors(nameErrors)} />
+        </Field>
 
-          <Field data-invalid={codeErrors ? true : undefined}>
-            <FieldLabel htmlFor="city-code">Kode</FieldLabel>
-            <Input
-              id="city-code"
-              name="code"
-              placeholder="BD"
-              maxLength={2}
-              autoComplete="off"
-              aria-invalid={codeErrors ? true : undefined}
-              defaultValue={state.values?.code ?? defaultValues?.code}
-              className="uppercase"
-            />
-            <FieldError errors={toFieldErrors(codeErrors)} />
-          </Field>
-        </FieldGroup>
+        <Field data-invalid={codeErrors ? true : undefined}>
+          <FieldLabel htmlFor="city-code">Kode</FieldLabel>
+          <Input
+            id="city-code"
+            name="code"
+            placeholder="BD"
+            maxLength={2}
+            autoComplete="off"
+            aria-invalid={codeErrors ? true : undefined}
+            defaultValue={state.values?.code ?? defaultValues?.code}
+            className="uppercase"
+          />
+          <FieldError errors={toFieldErrors(codeErrors)} />
+        </Field>
+      </FieldGroup>
 
-        <FieldError errors={toFieldErrors(state.errors?.form)} />
-      </CitySidePanelBody>
+      <FieldError errors={toFieldErrors(state.errors?.form)} />
 
-      <CitySidePanelFooter>
+      <div className="flex items-center gap-2">
         <Button type="submit" disabled={pending}>
           {pending && <Spinner />}
           {submitLabel}
@@ -106,7 +102,7 @@ export function CityForm({
         >
           Batal
         </Button>
-      </CitySidePanelFooter>
+      </div>
     </form>
   )
 }

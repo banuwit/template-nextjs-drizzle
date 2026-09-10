@@ -3,23 +3,16 @@
 import * as React from "react"
 import {
   AudioLinesIcon,
-  BookOpenIcon,
-  BotIcon,
-  FrameIcon,
   GalleryVerticalEndIcon,
   MapIcon,
-  PieChartIcon,
-  Settings2Icon,
   TerminalIcon,
-  TerminalSquareIcon,
-  Building2Icon,
-  GlobeIcon,
-  MapPinnedIcon,
+  MenuIcon,
+  SlidersHorizontalIcon,
   UsersIcon,
+  HomeIcon,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
-import { NavProjects } from "@/components/nav-projects"
 import { NavUser } from "@/components/nav-user"
 import { TeamSwitcher } from "@/components/team-switcher"
 import {
@@ -43,77 +36,35 @@ const data = {
   ],
   navMain: [
     {
+      title: "Dashboard",
+      url: "#",
+      icon: HomeIcon,
+    },
+    {
       title: "Users",
       url: "/users",
       icon: UsersIcon,
     },
     {
-      title: "Countries",
-      url: "/countries",
-      icon: GlobeIcon,
+      title: "Parameters",
+      url: "/parameters",
+      icon: SlidersHorizontalIcon,
     },
     {
-      title: "Provinces",
-      url: "/provinces",
-      icon: MapPinnedIcon,
-    },
-    {
-      title: "Cities",
-      url: "/cities",
-      icon: Building2Icon,
-    },
-    {
-      title: "Examples",
-      url: "/examples",
-      icon: TerminalSquareIcon,
-    },
-    {
-      title: "Playground",
+      title: "Location",
       url: "#",
-      icon: TerminalSquareIcon,
+      icon: MapIcon,
       items: [
-        { title: "History", url: "#" },
-        { title: "Starred", url: "#" },
-        { title: "Settings", url: "#" },
+        { title: "Countries", url: "/countries" },
+        { title: "Provinces", url: "/provinces" },
+        { title: "Cities", url: "/cities" },
       ],
     },
     {
-      title: "Models",
-      url: "#",
-      icon: BotIcon,
-      items: [
-        { title: "Genesis", url: "#" },
-        { title: "Explorer", url: "#" },
-        { title: "Quantum", url: "#" },
-      ],
+      title: "Menus",
+      url: "/menus",
+      icon: MenuIcon,
     },
-    {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpenIcon,
-      items: [
-        { title: "Introduction", url: "#" },
-        { title: "Get Started", url: "#" },
-        { title: "Tutorials", url: "#" },
-        { title: "Changelog", url: "#" },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2Icon,
-      items: [
-        { title: "General", url: "#" },
-        { title: "Team", url: "#" },
-        { title: "Billing", url: "#" },
-        { title: "Limits", url: "#" },
-      ],
-    },
-  ],
-  projects: [
-    { name: "Design Engineering", url: "#", icon: FrameIcon },
-    { name: "Sales & Marketing", url: "#", icon: PieChartIcon },
-    { name: "Travel", url: "#", icon: MapIcon },
   ],
 }
 
@@ -125,7 +76,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

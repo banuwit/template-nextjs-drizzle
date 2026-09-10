@@ -1,6 +1,6 @@
 "use client"
 
-import { EyeIcon, MoreHorizontalIcon, PencilIcon, Trash2Icon } from "lucide-react"
+import { EyeIcon, PencilIcon, Trash2Icon } from "lucide-react"
 
 import {
   AlertDialog,
@@ -13,15 +13,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Spinner } from "@/components/ui/spinner"
 import type { City } from "@/db/schema"
 
@@ -41,35 +32,39 @@ export function CityRowActions({
 
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" />}>
-          <span className="sr-only">Buka menu</span>
-          <MoreHorizontalIcon />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuGroup>
-            <DropdownMenuLabel>Aksi</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => onView(city)}>
-              <EyeIcon />
-              Lihat
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onEdit(city)}>
-              <PencilIcon />
-              Ubah
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
-          <DropdownMenuSeparator />
-          <DropdownMenuGroup>
-            <DropdownMenuItem
-              variant="destructive"
-              onClick={() => setConfirmOpen(true)}
-            >
-              <Trash2Icon />
-              Hapus
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <div className="flex items-center justify-end gap-1">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          aria-label="Lihat"
+          title="Lihat"
+          onClick={() => onView(city)}
+        >
+          <EyeIcon />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          aria-label="Ubah"
+          title="Ubah"
+          onClick={() => onEdit(city)}
+        >
+          <PencilIcon />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          aria-label="Hapus"
+          title="Hapus"
+          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+          onClick={() => setConfirmOpen(true)}
+        >
+          <Trash2Icon />
+        </Button>
+      </div>
 
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <AlertDialogContent>

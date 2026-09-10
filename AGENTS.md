@@ -33,8 +33,6 @@ This is a **starter template**. Ada empat referensi CRUD — pilih **salah satu*
 - **`src/app/provinces/`** — sama seperti countries, tapi create/view/edit di Sheet (bukan Dialog). Overlay Sheet memblokir klik di belakangnya.
 - **`src/app/cities/`** — panel inline (`city-side-panel` + `city-sheets`): body list menyusut (2 kolom), header/breadcrumb tetap penuh lebar. Bukan Sheet. Klik luar tidak menutup — hanya X atau Batal.
 
-`src/app/examples/` adalah demo TanStack Table read-only atas data statis; itu *bukan* konvensi halaman baru.
-
 ## Feature folder layout
 
 Every page/feature gets one folder under `src/app/<feature>/`, laid out like `src/app/users/`:

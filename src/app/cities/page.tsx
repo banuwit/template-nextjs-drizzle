@@ -1,11 +1,9 @@
 import type { Metadata } from "next"
-import { redirect } from "next/navigation"
 
 import { AppLayout } from "@/components/layouts/app-layout"
 
 import { CityWorkspace } from "./components/city-workspace"
 import { listCities } from "./queries"
-import { buildCitiesHref, parseCityListParams } from "./utils"
 
 export const metadata: Metadata = {
   title: "Cities",
@@ -13,35 +11,15 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic"
 
-export default async function CitiesPage({
-  searchParams,
-}: PageProps<"/cities">) {
-  const { search, page } = parseCityListParams(await searchParams)
-  const { rows, total, pageCount, offset } = await listCities({
-    search,
-    page,
-  })
-
-  if (page > pageCount) {
-    redirect(buildCitiesHref({ search, page: pageCount }))
-  }
+export default async function CitiesPage() {
+  // `DataTableClient` menyaring/mengurutkan/mem-paginasi di browser, jadi
+  // seluruh baris (bukan satu halaman) diambil sekali di sini.
+  const cities = await listCities()
 
   return (
     <AppLayout breadcrumbs={[{ label: "Cities" }]}>
-      <div className="flex min-h-0 flex-1 flex-col">
-        <CityWorkspace
-          cities={rows}
-          offset={offset}
-          emptyMessage={
-            search
-              ? `Tidak ada kota yang cocok dengan "${search}".`
-              : "Belum ada kota."
-          }
-          search={search}
-          page={page}
-          pageCount={pageCount}
-          total={total}
-        />
+      <div className="flex h-full flex-1 flex-col gap-6 p-4">
+        <CityWorkspace cities={cities} />
       </div>
     </AppLayout>
   )

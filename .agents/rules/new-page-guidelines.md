@@ -124,8 +124,6 @@ Wajib `loading.tsx` (Skeleton) dan `error.tsx` (prop `retry`, bukan `reset` — 
 
 Copy UI bahasa Indonesia. Label nav/breadcrumb = nama fitur Inggris (cocok sidebar).
 
-`src/app/examples/` adalah demo TanStack Table — **bukan** pola halaman baru.
-
 ### 7. Nav
 
 Tambah item di [`src/components/app-sidebar.tsx`](../../src/components/app-sidebar.tsx) (ikon Lucide + `url: "/{feature}"`). Di project ini tidak ada `app-header.tsx` terpisah seperti Laravel.

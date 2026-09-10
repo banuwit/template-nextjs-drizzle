@@ -2,7 +2,14 @@ import { loadEnvConfig } from "@next/env"
 import { drizzle } from "drizzle-orm/node-postgres"
 import { Pool } from "pg"
 
-import { cities, countries, provinces, users } from "./schema"
+import {
+  cities,
+  countries,
+  menus,
+  parameters,
+  provinces,
+  users,
+} from "./schema"
 
 loadEnvConfig(process.cwd())
 
@@ -98,6 +105,91 @@ const SAMPLE_CITIES = [
   { name: "Manado", code: "MN" },
 ] as const
 
+const SAMPLE_PARAMETERS = [
+  {
+    group: "order_status",
+    code: "ORDER_DRAFT",
+    value: "Draft",
+    description: "Pesanan belum dikirim ke gudang.",
+    textColor: "#374151",
+    bgColor: "#E5E7EB",
+    isSystem: true,
+    sortOrder: 0,
+  },
+  {
+    group: "order_status",
+    code: "ORDER_PAID",
+    value: "Sudah dibayar",
+    description: "Pembayaran diterima penuh.",
+    textColor: "#065F46",
+    bgColor: "#D1FAE5",
+    attributes: { icon: "check" },
+    isSystem: true,
+    sortOrder: 1,
+  },
+  {
+    group: "order_status",
+    code: "ORDER_CANCELLED",
+    value: "Dibatalkan",
+    textColor: "#991B1B",
+    bgColor: "#FEE2E2",
+    sortOrder: 2,
+  },
+  {
+    group: "payment_method",
+    code: "PAY_CASH",
+    value: "Tunai",
+    sortOrder: 3,
+  },
+  {
+    group: "payment_method",
+    code: "PAY_TRANSFER",
+    value: "Transfer bank",
+    attributes: { requires_proof: true },
+    sortOrder: 4,
+  },
+  {
+    group: "payment_method",
+    code: "PAY_CARD",
+    value: "Kartu kredit",
+    description: "Nonaktif sementara.",
+    isActive: false,
+    sortOrder: 5,
+  },
+  {
+    group: "priority",
+    code: "PRIORITY_LOW",
+    value: "Rendah",
+    textColor: "#1E40AF",
+    bgColor: "#DBEAFE",
+    sortOrder: 6,
+  },
+  {
+    group: "priority",
+    code: "PRIORITY_HIGH",
+    value: "Tinggi",
+    textColor: "#9A3412",
+    bgColor: "#FFEDD5",
+    sortOrder: 7,
+  },
+] as const
+
+/**
+ * Menu contoh, mencerminkan sidebar yang sekarang di-hardcode di
+ * `src/components/app-sidebar.tsx`. `parentSlug` diterjemahkan ke `parent_id`
+ * saat seed berjalan — id-nya belum diketahui sebelum induknya di-insert.
+ */
+const SAMPLE_MENUS = [
+  { name: "Dashboard", slug: "dashboard", icon: "LayoutDashboardIcon", routeName: "/dashboard", parentSlug: null },
+  { name: "Master Data", slug: "master-data", icon: "DatabaseIcon", routeName: null, parentSlug: null },
+  { name: "Users", slug: "users", icon: "UsersIcon", routeName: "/users", parentSlug: "master-data" },
+  { name: "Countries", slug: "countries", icon: "GlobeIcon", routeName: "/countries", parentSlug: "master-data" },
+  { name: "Provinces", slug: "provinces", icon: "MapPinnedIcon", routeName: "/provinces", parentSlug: "master-data" },
+  { name: "Cities", slug: "cities", icon: "Building2Icon", routeName: "/cities", parentSlug: "master-data" },
+  { name: "Parameters", slug: "parameters", icon: "SlidersHorizontalIcon", routeName: "/parameters", parentSlug: "master-data" },
+  { name: "Menus", slug: "menus", icon: "MenuIcon", routeName: "/menus", parentSlug: "master-data" },
+] as const
+
 async function seed() {
   const url = process.env.DATABASE_URL
 
@@ -173,6 +265,67 @@ async function seed() {
 
     console.log(
       `Seed cities: ${insertedCities.length} baris baru (${SAMPLE_CITIES.length} sample).`
+    )
+
+    const insertedParameters = await db
+      .insert(parameters)
+      .values(
+        SAMPLE_PARAMETERS.map((parameter, index) => ({
+          ...parameter,
+          createdAt: new Date(
+            now - (SAMPLE_PARAMETERS.length - 1 - index) * day
+          ),
+        }))
+      )
+      .onConflictDoNothing({ target: parameters.code })
+      .returning({ code: parameters.code })
+
+    console.log(
+      `Seed parameters: ${insertedParameters.length} baris baru (${SAMPLE_PARAMETERS.length} sample).`
+    )
+
+    // Dua tahap: induk dulu supaya `parent_id` anaknya bisa diisi. `level`
+    // diturunkan dari induk, sama seperti yang dilakukan `actions.ts`.
+    const existingMenus = await db
+      .select({ id: menus.id, slug: menus.slug })
+      .from(menus)
+    const menuIdBySlug = new Map(
+      existingMenus.map((menu) => [menu.slug as string, menu.id])
+    )
+
+    let insertedMenuCount = 0
+
+    for (const [index, menu] of SAMPLE_MENUS.entries()) {
+      if (menuIdBySlug.has(menu.slug)) continue
+
+      const parentId = menu.parentSlug
+        ? (menuIdBySlug.get(menu.parentSlug) ?? null)
+        : null
+
+      const [inserted] = await db
+        .insert(menus)
+        .values({
+          name: menu.name,
+          slug: menu.slug,
+          icon: menu.icon,
+          routeName: menu.routeName,
+          routePattern: menu.routeName ? `${menu.routeName}*` : null,
+          parentId,
+          level: parentId === null ? 0 : 1,
+          sortOrder: index,
+          createdAt: new Date(now - (SAMPLE_MENUS.length - 1 - index) * day),
+        })
+        .onConflictDoNothing({ target: menus.slug })
+        .returning({ id: menus.id, slug: menus.slug })
+
+      if (inserted) {
+        menuIdBySlug.set(inserted.slug, inserted.id)
+        insertedMenuCount += 1
+      }
+    }
+
+    console.log(
+      `Seed menus: ${insertedMenuCount} baris baru (${SAMPLE_MENUS.length} sample).`
     )
   } finally {
     await pool.end()

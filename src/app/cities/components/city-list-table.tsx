@@ -1,84 +1,117 @@
+"use client"
+
 import { format } from "date-fns"
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { DataTableClient } from "@/components/data-table/data-table-client"
+import type { DataTableColumn } from "@/components/data-table/types"
 import type { City } from "@/db/schema"
 
 import { CityRowActions } from "./city-row-actions"
 
-const COLUMN_COUNT = 5
+/**
+ * Definisi kolom WAJIB di Client Component: `cell` adalah fungsi, dan fungsi
+ * tidak bisa dioper dari Server Component ke Client Component. `page.tsx`
+ * cukup mengirim data yang serializable.
+ *
+ * `key` di sini harus sama persis dengan nama properti `City` — mode client
+ * membaca `row[key]` langsung untuk sort/filter (beda dengan mode server yang
+ * memetakan `key` ke nama kolom SQL).
+ */
+function buildColumns({
+  onView,
+  onEdit,
+}: {
+  onView: (city: City) => void
+  onEdit: (city: City) => void
+}): DataTableColumn<City>[] {
+  return [
+    {
+      key: "no",
+      header: "No.",
+      searchable: false,
+      // Tanpa footer pagination, seluruh baris ada di satu "halaman" —
+      // `index` di sini sudah nomor urut final, tidak perlu ditambah offset.
+      cell: (_row, index) => (
+        <span className="tabular-nums text-muted-foreground">
+          {index + 1}
+        </span>
+      ),
+      headClassName: "w-12",
+    },
+    {
+      key: "name",
+      header: "Nama",
+      sortable: true,
+      cell: (row) => (
+        <button
+          type="button"
+          className="font-medium hover:underline"
+          onClick={() => onView(row)}
+        >
+          {row.name}
+        </button>
+      ),
+    },
+    {
+      key: "code",
+      header: "Kode",
+      sortable: true,
+      cell: (row) => (
+        <span className="tabular-nums text-muted-foreground">
+          {row.code}
+        </span>
+      ),
+    },
+    {
+      key: "createdAt",
+      header: "Dibuat",
+      sortable: true,
+      align: "right",
+      // Tanpa ini, pencarian gabungan ikut mencocokkan `String(Date)` — yang
+      // di beberapa runtime menyisipkan nama zona waktu (mis. "Western
+      // Indonesia Time") dan bisa salah cocok ke istilah yang tidak terkait.
+      searchable: false,
+      cell: (row) => (
+        <span className="tabular-nums text-muted-foreground">
+          {format(row.createdAt, "dd MMM yyyy")}
+        </span>
+      ),
+    },
+    {
+      key: "actions",
+      header: <span className="sr-only">Aksi</span>,
+      align: "right",
+      headClassName: "w-28",
+      cell: (row) => (
+        <CityRowActions city={row} onView={onView} onEdit={onEdit} />
+      ),
+    },
+  ]
+}
 
 export function CityListTable({
   cities,
-  offset,
-  emptyMessage,
   onView,
   onEdit,
 }: {
   cities: City[]
-  offset: number
-  emptyMessage: string
   onView: (city: City) => void
   onEdit: (city: City) => void
 }) {
   return (
-    <div className="overflow-hidden rounded-md border">
-      <Table>
-        <TableHeader className="bg-muted">
-          <TableRow>
-            <TableHead className="w-12">No.</TableHead>
-            <TableHead>Nama</TableHead>
-            <TableHead>Kode</TableHead>
-            <TableHead>Dibuat</TableHead>
-            <TableHead className="w-12" />
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {cities.length ? (
-            cities.map((city, index) => (
-              <TableRow key={city.id}>
-                <TableCell className="tabular-nums text-muted-foreground">
-                  {offset + index + 1}
-                </TableCell>
-                <TableCell className="font-medium">
-                  <button
-                    type="button"
-                    className="hover:underline"
-                    onClick={() => onView(city)}
-                  >
-                    {city.name}
-                  </button>
-                </TableCell>
-                <TableCell className="tabular-nums text-muted-foreground">
-                  {city.code}
-                </TableCell>
-                <TableCell className="tabular-nums text-muted-foreground">
-                  {format(city.createdAt, "dd MMM yyyy")}
-                </TableCell>
-                <TableCell className="text-right">
-                  <CityRowActions
-                    city={city}
-                    onView={onView}
-                    onEdit={onEdit}
-                  />
-                </TableCell>
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={COLUMN_COUNT} className="h-24 text-center">
-                {emptyMessage}
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </div>
+    <DataTableClient
+      columns={buildColumns({ onView, onEdit })}
+      data={cities}
+      rowKey={(row) => row.id}
+      pagination="none"
+      defaultSort={{ key: "createdAt", direction: "desc" }}
+      toolbar={{
+        searches: [{ key: "search", placeholder: "Cari nama atau kode..." }],
+      }}
+      emptyTitle="Belum ada kota."
+      emptyDescription="Tambahkan kota pertama lewat tombol Kota baru."
+      emptyFilteredTitle="Tidak ada kota yang cocok dengan pencarian ini."
+      emptyFilteredDescription="Ubah kata kunci pencarian."
+    />
   )
 }

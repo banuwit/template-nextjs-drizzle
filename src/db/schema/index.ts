@@ -1,4 +1,6 @@
 export * from "./cities"
 export * from "./countries"
+export * from "./menus"
+export * from "./parameters"
 export * from "./provinces"
 export * from "./users"

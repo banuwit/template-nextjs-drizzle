@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, type ReactNode } from "react"
+import { useState } from "react"
 import { PlusIcon } from "lucide-react"
 
 import Heading from "@/components/heading"
@@ -9,23 +9,15 @@ import { Card, CardContent } from "@/components/ui/card"
 import type { Country } from "@/db/schema"
 
 import { CountryFormDialog } from "./country-form-dialog"
-import { CountryTable } from "./country-table"
+import { CountryListTable } from "./country-list-table"
 import { CountryViewDialog } from "./country-view-dialog"
 
 type DialogMode = "create" | "view" | "edit" | null
 
 export function CountryWorkspace({
   countries,
-  offset,
-  emptyMessage,
-  search,
-  pagination,
 }: {
   countries: Country[]
-  offset: number
-  emptyMessage: string
-  search: ReactNode
-  pagination: ReactNode
 }) {
   const [mode, setMode] = useState<DialogMode>(null)
   const [selected, setSelected] = useState<Country>()
@@ -57,11 +49,8 @@ export function CountryWorkspace({
 
       <Card className="gap-0 overflow-hidden py-0">
         <CardContent className="flex flex-col gap-4 p-4">
-          {search}
-          <CountryTable
+          <CountryListTable
             countries={countries}
-            offset={offset}
-            emptyMessage={emptyMessage}
             onView={(country) => {
               setSelected(country)
               setMode("view")
@@ -71,7 +60,6 @@ export function CountryWorkspace({
               setMode("edit")
             }}
           />
-          {pagination}
         </CardContent>
       </Card>
 
