@@ -32,15 +32,29 @@ const themeScript = `
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
+    // `overscroll-y-none` di root scroller (html): tanpa ini, scroll cepat/
+    // trackpad memicu rubber-band bounce, dan selama bounce itu browser
+    // menghitung ulang posisi sticky per frame — header jadi kelihatan
+    // "ikut" bergerak sesaat sebelum settle balik ke top-0.
     <html
       lang="en"
-      className={cn("h-full", "antialiased", geistMono.variable, "font-sans", inter.variable, geistHeading.variable)}
+      className={cn("h-full", "overscroll-y-none", "antialiased", geistMono.variable, "font-sans", inter.variable, geistHeading.variable)}
       suppressHydrationWarning
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="min-h-full flex flex-col">
+      {/*
+        overflow-x-hidden di SINI (bukan di div sidebar-wrapper) supaya
+        clipping-nya jadi properti scroller akar lewat "overflow propagation
+        to viewport" (spec HTML) — bukan scroll container baru. Kalau ini
+        dipasang di elemen non-body, overflow-y otomatis ikut jadi `auto`
+        (aturan CSS: satu axis non-visible memaksa axis lain auto), yang
+        membuat elemen itu jadi "nearest scroll container" baru, dan header
+        sticky di dalamnya jadi nempel ke situ (bukan ke scroll halaman) —
+        makanya ikut scroll alih-alih diam di atas.
+      */}
+      <body className="min-h-full flex flex-col overflow-x-hidden">
         <Toaster>{children}</Toaster>
       </body>
     </html>

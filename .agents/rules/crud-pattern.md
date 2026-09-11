@@ -619,7 +619,7 @@ Prop-nya `retry`, **bukan** `reset` — itu perubahan Next.js 16.
 
 - Susunan: `Heading` + tombol Create, lalu komponen tabel (yang sudah membawa toolbar + tabel + pagination sebagai satu blok). Tidak perlu `CardHeader`/`CardFooter` terpisah kecuali user minta.
 - Breadcrumb di bawah judul `Heading` (bukan di header sidebar). Trails tetap dioper ke `AppLayout breadcrumbs={...}`.
-- Pakai `gap-*`, bukan `space-y-*`. Pakai token semantik (`text-muted-foreground`), bukan warna mentah.
+- Pakai `gap-*`, bukan `space-y-*`. Pakai token semantik (`text-muted-foreground`), bukan warna mentah — token sudah otomatis benar di dark mode, warna mentah tidak. Kalau fitur butuh warna BEBAS dari DB (bukan token, mis. badge warna custom), lihat bagian "Dark mode" di [AGENTS.md](../../AGENTS.md) dan contoh [parameter-value-badge.tsx](../../src/app/parameters/components/parameter-value-badge.tsx) — jangan pasang hex langsung ke `style` properti warna, itu tidak bisa di-override `dark:`.
 - Semua copy UI bahasa Inggris (label, placeholder, toast, pesan zod, error dari action). Label nav dan breadcrumb = nama fitur supaya cocok dengan sidebar (sidebar dirender dari tabel `menus` — tambahkan barisnya).
 
 ## D.4 Form create/edit

@@ -314,6 +314,12 @@ const columns: DataTableColumn<{Feature}>[] = [
     ),
   },
   {
+    // Enum tetap (status, layout, dll.) → `Badge` varian bawaan
+    // (default/secondary/destructive/outline) sudah otomatis benar di dark
+    // mode karena pakai token tema. KALAU warnanya bebas dari DB (mis. hex
+    // pilihan user, bukan enum), itu beda pola — lihat bagian "Dark mode" di
+    // AGENTS.md dan contoh `parameter-value-badge.tsx`, jangan taruh hex
+    // langsung ke `style` properti warna.
     key: "status",
     header: "Status",
     cell: (row) => <Badge>{row.status}</Badge>,

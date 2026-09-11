@@ -170,6 +170,7 @@ Kalau UI berubah: buka halaman, exercise create/view/edit/delete, pastikan state
 - **`redirect()` pada Dialog/Sheet/panel:** overlay tidak sempat menutup dengan rapi; pakai `{ ok: true }`.
 - **Boolean `Switch`/`Checkbox` di FormData:** field unchecked **tidak terkirim**. Pola aman: `useState` + `<input type="hidden" name="…" value={on ? "1" : "0"} />` supaya nilai selalu eksplisit. (Sama seperti trap form native di [new-pages-pattern.md](../../docs/legacy/new-pages-pattern.md).)
 - **Field kompleks (JSON, color picker, …):** boleh ditunda dari UI iterasi pertama selama kolom sudah ada di schema/migrasi — jangan silently drop dari tabel. Catat TODO kalau relevan.
+- **Menampilkan warna hex bebas dari DB (bukan enum/token)?** Jangan taruh hex langsung ke properti `color`/`background-color` — tidak bisa dibuat benar di dark mode. Lihat bagian "Dark mode" di [AGENTS.md](../../AGENTS.md) dan contoh [parameter-value-badge.tsx](../../src/app/parameters/components/parameter-value-badge.tsx).
 - **Mengubah `src/components/ui/sheet.tsx` untuk panel inline:** dilarang. Buat `{feature}-side-panel.tsx` lokal.
 - **`useMemo` / `useCallback` / `memo` untuk performa:** React Compiler sudah nyala (`reactCompiler: true`). Jangan ditambah tangan.
 - **Hot reload bocor koneksi Postgres:** jangan hapus pola `globalThis` di `src/db/index.ts`.

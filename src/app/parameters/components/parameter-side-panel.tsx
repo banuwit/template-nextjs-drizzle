@@ -38,7 +38,7 @@ export function ParameterSidePanelLayout({
           // sama dengan `h-12` di `app-sidebar-header.tsx` — kalau tinggi
           // header itu berubah, ubah juga di sini (selisihnya nongol sebagai
           // gap antara header dan panel).
-          "sticky top-12 flex h-[calc(100svh-3rem)] shrink-0 flex-col overflow-hidden bg-background transition-[width] duration-200 ease-in-out",
+          "sticky top-12 flex h-[calc(100svh-3rem)] shrink-0 flex-col overflow-hidden bg-card transition-[width] duration-200 ease-in-out",
           open ? "w-[28rem] max-w-full border-l" : "w-0",
         )}
         aria-hidden={!open}

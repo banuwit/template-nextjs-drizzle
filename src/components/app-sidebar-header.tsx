@@ -1,8 +1,6 @@
-import { BellIcon } from "lucide-react"
-
 import { NavUser } from "@/components/nav-user"
+import { NotificationBell } from "@/components/notification-bell"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { requireUser } from "@/lib/session"
 
@@ -17,14 +15,7 @@ export async function AppSidebarHeader() {
       </div>
       <div className="flex items-center gap-2 px-4">
         <ThemeToggle />
-        <Button
-          variant="ghost"
-          size="icon"
-          className="rounded-full"
-          aria-label="Notifications"
-        >
-          <BellIcon />
-        </Button>
+        <NotificationBell />
         <NavUser user={user} />
       </div>
     </header>
