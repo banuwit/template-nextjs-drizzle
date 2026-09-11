@@ -22,14 +22,14 @@ export function useDeleteUser(user: { id: string; name: string }) {
         setConfirmOpen(false)
         toast.add({
           type: "success",
-          title: "User dihapus",
-          description: `${user.name} sudah dihapus.`,
+          title: "User deleted",
+          description: `${user.name} has been deleted.`,
         })
       } catch {
         toast.add({
           type: "error",
-          title: "Gagal menghapus user",
-          description: "Coba lagi sebentar lagi.",
+          title: "Failed to delete user",
+          description: "Please try again shortly.",
         })
       }
     })

@@ -16,7 +16,7 @@ import {
 import { alias } from "drizzle-orm/pg-core"
 
 import { db } from "@/db"
-import { menus, type Menu } from "@/db/schema"
+import { menus } from "@/db/schema"
 import { paginate } from "@/lib/pagination"
 import { requireUser } from "@/lib/session"
 import type { Paginated } from "@/types/pagination"
@@ -187,42 +187,6 @@ export async function nextMenuSortOrder(): Promise<number> {
     .where(notDeleted)
 
   return (row?.max ?? -1) + 1
-}
-
-export type MenuTreeNode = Menu & { children: MenuTreeNode[] }
-
-/**
- * Menu aktif satu layout dalam bentuk pohon — bentuk yang dibutuhkan
- * `app-sidebar.tsx` saat sidebar nanti dipindah ke database. Belum dipakai
- * halaman mana pun; disediakan supaya konsumen tidak menulis query sendiri.
- */
-export async function listMenuTree(layout = "sidebar"): Promise<MenuTreeNode[]> {
-  await requireUser()
-
-  const rows = await db
-    .select()
-    .from(menus)
-    .where(and(notDeleted, eq(menus.isActive, true), eq(menus.layout, layout)))
-    .orderBy(asc(menus.sortOrder), asc(menus.internalId))
-
-  const nodes = new Map<string, MenuTreeNode>(
-    rows.map((row) => [row.id, { ...row, children: [] }]),
-  )
-  const roots: MenuTreeNode[] = []
-
-  nodes.forEach((node) => {
-    const parent = node.parentId === null ? undefined : nodes.get(node.parentId)
-
-    // Induk yang nonaktif / beda layout / terhapus tidak ada di map, jadi
-    // anaknya diperlakukan sebagai root daripada hilang dari sidebar.
-    if (parent) {
-      parent.children.push(node)
-    } else {
-      roots.push(node)
-    }
-  })
-
-  return roots
 }
 
 /**

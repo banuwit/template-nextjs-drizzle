@@ -17,14 +17,14 @@ export function useDeleteProvince(province: { id: string; name: string }) {
         setConfirmOpen(false)
         toast.add({
           type: "success",
-          title: "Provinsi dihapus",
-          description: `${province.name} sudah dihapus.`,
+          title: "Province deleted",
+          description: `${province.name} has been deleted.`,
         })
       } catch {
         toast.add({
           type: "error",
-          title: "Gagal menghapus provinsi",
-          description: "Coba lagi sebentar lagi.",
+          title: "Failed to delete province",
+          description: "Please try again shortly.",
         })
       }
     })

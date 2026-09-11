@@ -43,7 +43,7 @@ export async function signIn(
     return {
       errors: {
         form: [
-          `Terlalu banyak percobaan login. Coba lagi dalam ${limited.retryAfterSeconds} detik.`,
+          `Too many sign-in attempts. Try again in ${limited.retryAfterSeconds} seconds.`,
         ],
       },
       values: { email: parsed.data.email },
@@ -59,7 +59,7 @@ export async function signIn(
     if (error instanceof APIError) {
       // Pesan sengaja generik: jangan bocorkan apakah email terdaftar.
       return {
-        errors: { form: ["Email atau password salah"] },
+        errors: { form: ["Invalid email or password"] },
         values: { email: parsed.data.email },
       }
     }
@@ -105,9 +105,9 @@ export async function changePassword(
   } catch (error) {
     if (error instanceof APIError) {
       if (error.body?.code === "INVALID_PASSWORD") {
-        return { errors: { currentPassword: ["Password saat ini salah"] } }
+        return { errors: { currentPassword: ["Current password is incorrect"] } }
       }
-      return { errors: { form: ["Gagal mengganti password. Coba lagi."] } }
+      return { errors: { form: ["Failed to change password. Please try again."] } }
     }
     throw error
   }

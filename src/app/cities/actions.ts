@@ -40,7 +40,7 @@ function parseCityForm(formData: FormData): ParseResult {
 }
 
 const NAME_OR_CODE_TAKEN: CityActionState["errors"] = {
-  form: ["Nama atau kode sudah terdaftar"],
+  form: ["Name or code is already registered"],
 }
 
 export async function createCity(

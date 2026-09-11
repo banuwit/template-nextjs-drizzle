@@ -9,27 +9,27 @@ const HEX_COLOR = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/
 
 const hexColor = z
   .string()
-  .regex(HEX_COLOR, "Warna harus format hex, mis. #1D4ED8")
-  .max(10, "Warna maksimal 10 karakter")
+  .regex(HEX_COLOR, "Color must be a hex value, e.g. #1D4ED8")
+  .max(10, "Color must be at most 10 characters")
   .nullable()
 
 export const parameterFormSchema = z.object({
   group: z
     .string()
-    .min(1, "Grup wajib diisi")
-    .max(50, "Grup maksimal 50 karakter"),
+    .min(1, "Group is required")
+    .max(50, "Group must be at most 50 characters"),
   code: z
     .string()
-    .min(1, "Kode wajib diisi")
-    .max(100, "Kode maksimal 100 karakter")
+    .min(1, "Code is required")
+    .max(100, "Code must be at most 100 characters")
     .regex(
       /^[A-Z0-9_.-]+$/,
-      "Kode hanya boleh huruf kapital, angka, titik, dan underscore",
+      "Code may only contain uppercase letters, numbers, dots, and underscores",
     ),
   value: z
     .string()
-    .min(1, "Nilai wajib diisi")
-    .max(150, "Nilai maksimal 150 karakter"),
+    .min(1, "Value is required")
+    .max(150, "Value must be at most 150 characters"),
   description: z.string().max(5000, "Deskripsi terlalu panjang").nullable(),
   textColor: hexColor,
   bgColor: hexColor,
@@ -37,8 +37,8 @@ export const parameterFormSchema = z.object({
   isSystem: z.boolean(),
   isActive: z.boolean(),
   sortOrder: z
-    .number("Urutan harus berupa angka")
-    .int("Urutan harus bilangan bulat")
-    .min(0, "Urutan minimal 0")
-    .max(2147483647, "Urutan terlalu besar"),
+    .number("Order must be a number")
+    .int("Order must be an integer")
+    .min(0, "Order must be at least 0")
+    .max(2147483647, "Order is too large"),
 })

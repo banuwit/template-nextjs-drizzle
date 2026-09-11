@@ -98,6 +98,8 @@ export default defineConfig({
 
 ### 6. Schema
 
+> **Catatan:** contoh schema di dokumen ini adalah setup minimal Drizzle. Tabel domain di repo ini memakai `...identityColumns()` + `...auditColumns()` dari [`src/db/schema/columns.ts`](../../src/db/schema/columns.ts) — `id` publik = uuid v7, FK = `uuid(...)`, soft delete. Lihat [`countries.ts`](../../src/db/schema/countries.ts) sebagai acuan, bukan contoh `integer` di bawah.
+
 `src/db/schema/users.ts`:
 
 ```ts

@@ -17,14 +17,14 @@ export function useDeleteMenu(menu: { id: string; name: string }) {
         setConfirmOpen(false)
         toast.add({
           type: "success",
-          title: "Menu dihapus",
-          description: `${menu.name} beserta submenunya sudah dihapus.`,
+          title: "Menu deleted",
+          description: `${menu.name} and its submenus has been deleted.`,
         })
       } catch {
         toast.add({
           type: "error",
-          title: "Gagal menghapus menu",
-          description: "Coba lagi sebentar lagi.",
+          title: "Failed to delete menu",
+          description: "Please try again shortly.",
         })
       }
     })

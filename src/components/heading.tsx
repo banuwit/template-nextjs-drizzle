@@ -10,7 +10,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { cn } from "@/lib/utils"
 
 export type BreadcrumbEntry = {
   label: string
@@ -75,7 +74,7 @@ export default function Heading({
 
   return (
     <header
-      className={cn("flex flex-col gap-0.5", variant !== "small")}
+      className="flex flex-col gap-0.5"
     >
         <HeadingTrail breadcrumbs={trail} />
         <h2

@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useState, useTransition } from "react"
 
 import { signOut } from "@/app/auth/actions"
@@ -70,7 +71,7 @@ export function NavUser({ user }: { user: CurrentUser }) {
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem>
+            <DropdownMenuItem render={<Link href={`/users/${user.id}`} />}>
               <BadgeCheckIcon />
               Account
             </DropdownMenuItem>

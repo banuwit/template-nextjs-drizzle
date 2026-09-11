@@ -19,19 +19,27 @@ npm run dev      # next dev — also regenerates the agent-rules block above
 npm run build    # next build
 npm start        # next start (serve the production build)
 npm run lint     # eslint (flat config, no path arg needed)
-npx tsc --noEmit # typecheck; there is no `typecheck` script
+npm run typecheck # tsc --noEmit
 ```
 
 No test runner is configured — there are no test files, no test dependency, and no `test` script. If tests are needed, pick and install a runner first rather than assuming one exists.
 
 ## State of the repo
 
-This is a **starter template**. Ada empat referensi CRUD — pilih **salah satu**, jangan dicampur. Sebelum scaffold CRUD baru: baca [.agents/rules/crud-pattern.md](.agents/rules/crud-pattern.md) dan **tanya** keempat opsi (jangan mengasumsikan). Checklist langkah demi langkah: [.agents/rules/new-page-guidelines.md](.agents/rules/new-page-guidelines.md). Penjelasan UX: [crud-pattern-laravel.md](crud-pattern-laravel.md).
+This is a **starter template**. Ada empat referensi CRUD — pilih **salah satu**, jangan dicampur. Sebelum scaffold CRUD baru: baca [.agents/rules/crud-pattern.md](.agents/rules/crud-pattern.md) dan **tanya** keempat opsi (jangan mengasumsikan). Checklist langkah demi langkah: [.agents/rules/new-page-guidelines.md](.agents/rules/new-page-guidelines.md). Latar belakang UX (legacy Laravel): [docs/legacy/crud-pattern-laravel.md](docs/legacy/crud-pattern-laravel.md).
 
-- **`src/app/users/`** — CRUD multi-halaman (list / new / `[id]` / `[id]/edit`). Pakai ini kalau create/view/edit butuh URL sendiri.
-- **`src/app/countries/`** — CRUD satu halaman; create/view/edit di Dialog, hapus di AlertDialog. Sukses mutasi: `revalidatePath` + `{ ok: true }`, **tanpa** `redirect()`.
-- **`src/app/provinces/`** — sama seperti countries, tapi create/view/edit di Sheet (bukan Dialog). Overlay Sheet memblokir klik di belakangnya.
-- **`src/app/cities/`** — panel inline (`city-side-panel` + `city-sheets`): body list menyusut (2 kolom), header/breadcrumb tetap penuh lebar. Bukan Sheet. Klik luar tidak menutup — hanya X atau Batal.
+- **`src/app/users/`** — CRUD multi-halaman (list / new / `[id]` / `[id]/edit`), tabel `DataGridServer`. Pakai ini kalau create/view/edit butuh URL sendiri.
+- **`src/app/countries/`** (juga `provinces/`, `cities/`) — CRUD satu halaman; create/view/edit di Dialog, hapus di AlertDialog, tabel `DataTableClient`. Sukses mutasi: `revalidatePath` + `{ ok: true }`, **tanpa** `redirect()`.
+- **`src/app/menus/`** — sama, tapi create/view/edit di Sheet (overlay memblokir klik di belakangnya), tabel `DataTableServer` (paginasi/sort/filter lewat query string).
+- **`src/app/parameters/`** — panel inline (`parameter-side-panel` + `parameter-sheets`): body list menyusut, header/breadcrumb tetap penuh lebar. Bukan Sheet. Klik luar tidak menutup — hanya X atau Cancel. Tabel `DataGridClient`.
+
+### Tables: `data-table` vs `data-grid`
+
+Dua keluarga komponen di `src/components/`, keduanya punya varian client & server:
+
+- **`data-table/`** — ringan, kolom berupa config objek (`DataTableColumn`). Cocok untuk list sederhana.
+- **`data-grid/`** — berbasis TanStack Table (`createColumnHelper`), mendukung column pinning/ordering/visibility. Cocok untuk list yang butuh fitur grid.
+- **Client** (`*Client`): semua baris diambil sekali, filter/sort/paginasi di browser — untuk tabel kecil (≲ ribuan baris). **Server** (`*Server`): `queries.ts` membaca `searchParams` dan mengembalikan `Paginated<T>` dari `paginate()` — untuk tabel yang tumbuh.
 
 ## Feature folder layout
 
@@ -54,7 +62,7 @@ src/app/users/
 └── components/              # komponen khusus fitur, prefix nama fitur
 ```
 
-`src/app/countries/`, `src/app/provinces/`, dan `src/app/cities/` mengikuti kontrak yang sama (`actions.ts` / `queries.ts` / `types/` / `utils/` / `hooks/` / `components/`) **tanpa** `new/` dan `[id]/`. Countries memakai Dialog; provinces memakai Sheet modal; cities memakai panel inline (bukan Sheet).
+`countries/`, `provinces/`, `cities/`, `menus/`, dan `parameters/` mengikuti kontrak yang sama (`actions.ts` / `queries.ts` / `types/` / `utils/` / `hooks/` / `components/`) **tanpa** `new/` dan `[id]/`. Countries/provinces/cities memakai Dialog; menus memakai Sheet modal; parameters memakai panel inline (bukan Sheet).
 
 Rules that make this work:
 
@@ -72,12 +80,17 @@ Rules that make this work:
 - Server action signature is `(prevState, formData) => Promise<UserActionState>`, driven by `useActionState`. Prefix `ActionState` dengan nama fitur (`UserActionState`, bukan `ActionState`) supaya tidak tabrakan saat fitur kedua di-copy. Bind extra args with `.bind(null, id)` (see [\[id\]/edit/page.tsx](src/app/users/[id]/edit/page.tsx)).
 - Validate with zod inside the action and return `z.flattenError(err).fieldErrors`; return the submitted `values` too so the form can repopulate inputs after a failure.
 - Render errors with `<FieldError errors={toFieldErrors(...)}>` — there is no `ui/form.tsx` / react-hook-form in this project.
-- `revalidatePath()` then `redirect()` on success **untuk CRUD multi-halaman** (`users`). `redirect()` throws internally, so call it **outside** any `try` block. CRUD overlay (`countries` Dialog, `provinces` Sheet, `cities` panel inline) tidak `redirect()` — return `{ ok: true }` lalu tutup overlay/panel di client.
+- `revalidatePath()` then `redirect()` on success **untuk CRUD multi-halaman** (`users`). `redirect()` throws internally, so call it **outside** any `try` block. CRUD overlay (`countries`/`provinces`/`cities` Dialog, `menus` Sheet, `parameters` panel inline) tidak `redirect()` — return `{ ok: true }` lalu tutup overlay/panel di client.
 - Catch unique-constraint clashes with `isUniqueViolation(error)` and turn them into a field error instead of a 500.
 - **A `Button` that renders a `Link` needs `nativeButton={false}`.** Base UI's `Button` defaults `nativeButton` to `true`; rendering an `<a>` without flipping it logs *"A component that acts as a button expected a native `<button>`"* and drops the `role="button"`/keyboard semantics. Vendored [ui/pagination.tsx](src/components/ui/pagination.tsx) does the same thing. This applies only to Base UI `Button` — `DropdownMenuItem` (Menu.Item) already defaults to `false`, and `SidebarMenuButton` doesn't use the prop.
 - `<Button disabled render={<Link/>}>` renders `<a disabled>`, which browsers ignore — when a link-button must be inert, render a plain `<button disabled>` instead (see [components/user-pagination.tsx](src/app/users/components/user-pagination.tsx)).
 - `queries.ts` starts with `import "server-only"` so a client import fails at build time. Wrap `getXById` in `React.cache()` so `generateMetadata` and the page share one query.
-- Export `metadata` or `generateMetadata` on every page. Copy UI fitur ini bahasa Indonesia; nama fitur di nav/breadcrumb tetap "Users" (cocok dengan sidebar).
+- Export `metadata` or `generateMetadata` on every page (root layout applies the `%s | {siteConfig.name}` title template from [src/config/site.ts](src/config/site.ts)).
+- **All user-visible copy is English** — labels, placeholders, toasts, zod messages, and errors returned from actions. Code comments and these docs may stay in Bahasa Indonesia.
+
+### Sidebar navigation
+
+The sidebar is **rendered from the `menus` table**, not hardcoded: `AppLayout` (server) calls `listNavMenu()` from [src/lib/navigation.ts](src/lib/navigation.ts) and passes the tree to `AppSidebar`. `menus.routeName` is the link URL and `menus.icon` a lucide-react icon name — register new names in the `ICONS` map in [src/components/app-sidebar.tsx](src/components/app-sidebar.tsx) (unknown names fall back to `CircleIcon`). New feature = new page **plus** a row in `/menus` (or in `src/db/seed.ts`). Menu mutations call `revalidatePath("/", "layout")` so the sidebar refreshes immediately.
 
 ## Data layer (Drizzle + PostgreSQL)
 
@@ -91,7 +104,7 @@ npm run db:studio     # browse/edit rows in a GUI
 ```
 
 - **Schema lives in `src/db/schema/` as a folder**, re-exported from `src/db/schema/index.ts`. `drizzle.config.ts` points at that barrel, so a table missing from it is silently skipped by migrations.
-- **Column names are written by hand**, not derived via the `casing` option: single-word properties may go bare (`name`, `email`), multi-word ones must pass an explicit snake_case argument (`createdAt: timestamp("created_at")`). Nothing enforces this — check the generated SQL before committing.
+- **Column names are written explicitly**: single-word properties may go bare (`name`, `email`), multi-word ones pass an explicit snake_case argument (`createdAt: timestamp("created_at")`). `drizzle.config.ts` also sets `casing: "snake_case"` as a safety net for drizzle-kit, but don't rely on it — check the generated SQL before committing.
 - **Every domain table spreads `...identityColumns()` and `...auditColumns()`** from [src/db/schema/columns.ts](src/db/schema/columns.ts):
   - Kolom `id` = integer identity PK, properti TS **`internalId`** — internal saja (tie-breaker sort), jangan dipakai di URL/action/relasi.
   - Kolom `uuid` = UUID v7 (`uuidv7()`, butuh Postgres 18+), properti TS **`id`** — identitas publik. Semua FK, URL, dan argumen action memakai ini. Penamaan terbalik ini disengaja: Better Auth selalu membaca properti `id` pada model user.
@@ -107,6 +120,7 @@ npm run db:studio     # browse/edit rows in a GUI
 
 - **Config tunggal di [src/lib/auth.ts](src/lib/auth.ts)** (Drizzle adapter, `usePlural`, `generateId: false` — id dibuat Postgres, email+password dengan `disableSignUp`). User yang di-soft-delete ditolak di `databaseHooks.session.create` dan di `requireUser()`; `deleteUser` juga menghapus sesinya. Tabel: `users` (model user) + [src/db/schema/auth.ts](src/db/schema/auth.ts) (`sessions`, `accounts`, `verifications`). Hash password ada di `accounts.password` (`providerId = "credential"`), bukan di `users`.
 - **`requireUser()` dari [src/lib/session.ts](src/lib/session.ts) wajib dipanggil di awal setiap fungsi `queries.ts` dan setiap server action.** [src/proxy.ts](src/proxy.ts) hanya cek optimistic (ada cookie atau tidak) — bukan pengaman data.
+- **Sesi mati dengan cookie masih ada** (kedaluwarsa, dicabut, DB di-reset): `requireUser()` redirect ke `/auth/expired` ([route handler](src/app/auth/expired/route.ts)) yang menghapus cookie `better-auth.*` lalu redirect ke `/`. Tanpa ini proxy memantulkan `/` ↔ `/dashboard` (`ERR_TOO_MANY_REDIRECTS`). Server Component tidak boleh menulis cookie, jadi pembersihan harus lewat route handler.
 - Login / logout / ganti password: server action di [src/app/auth/actions.ts](src/app/auth/actions.ts) memanggil `auth.api.*`; plugin `nextCookies()` yang menulis cookie. Tangkap `APIError` dari `better-auth/api` untuk jadi error form.
 - Rate limit bawaan Better Auth hanya berlaku untuk HTTP `/api/auth/*`, jadi login dibatasi manual lewat [src/lib/rate-limit.ts](src/lib/rate-limit.ts) (in-memory, per instance — ganti ke Redis/DB bila multi-instance).
 - User dibuat admin di `/users/new` beserta password awal (insert `users` + `accounts` dalam satu transaksi, hash lewat `(await auth.$context).password.hash`). Seed membuat `admin@example.com` / `password123`.

@@ -21,16 +21,16 @@ export function useDeleteParameter(parameter: {
         setConfirmOpen(false)
         toast.add({
           type: "success",
-          title: "Parameter dihapus",
-          description: `${parameter.code} sudah dihapus.`,
+          title: "Parameter deleted",
+          description: `${parameter.code} has been deleted.`,
         })
       } catch {
         toast.add({
           type: "error",
-          title: "Gagal menghapus parameter",
+          title: "Failed to delete parameter",
           description: parameter.isSystem
-            ? "Parameter sistem tidak bisa dihapus."
-            : "Coba lagi sebentar lagi.",
+            ? "System parameters cannot be deleted."
+            : "Please try again shortly.",
         })
       }
     })

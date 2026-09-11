@@ -9,35 +9,35 @@ import { z } from "zod"
  * bukan diisi user.
  */
 const optionalText = (max: number, label: string) =>
-  z.string().max(max, `${label} maksimal ${max} karakter`).nullable()
+  z.string().max(max, `${label} must be at most ${max} characters`).nullable()
 
 export const menuFormSchema = z.object({
   name: z
     .string()
-    .min(1, "Nama wajib diisi")
-    .max(255, "Nama maksimal 255 karakter"),
+    .min(1, "Name is required")
+    .max(255, "Name must be at most 255 characters"),
   slug: z
     .string()
-    .min(1, "Slug wajib diisi")
-    .max(255, "Slug maksimal 255 karakter")
+    .min(1, "Slug is required")
+    .max(255, "Slug must be at most 255 characters")
     .regex(
       /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-      "Slug hanya boleh huruf kecil, angka, dan tanda hubung",
+      "Slug may only contain lowercase letters, numbers, and hyphens",
     ),
-  icon: optionalText(255, "Ikon"),
-  routeName: optionalText(255, "Nama route"),
-  routePattern: optionalText(255, "Pola route"),
+  icon: optionalText(255, "Icon"),
+  routeName: optionalText(255, "Route name"),
+  routePattern: optionalText(255, "Route pattern"),
   // uuid menu induk (lihat `identityColumns` di src/db/schema/columns.ts).
-  parentId: z.uuid("Menu induk tidak valid").nullable(),
+  parentId: z.uuid("Invalid parent menu").nullable(),
   sortOrder: z
-    .number("Urutan harus berupa angka")
-    .int("Urutan harus bilangan bulat")
-    .min(0, "Urutan minimal 0")
-    .max(2147483647, "Urutan terlalu besar"),
+    .number("Order must be a number")
+    .int("Order must be an integer")
+    .min(0, "Order must be at least 0")
+    .max(2147483647, "Order is too large"),
   layout: z
     .string()
-    .min(1, "Layout wajib diisi")
-    .max(255, "Layout maksimal 255 karakter"),
+    .min(1, "Layout is required")
+    .max(255, "Layout must be at most 255 characters"),
   isActive: z.boolean(),
 })
 

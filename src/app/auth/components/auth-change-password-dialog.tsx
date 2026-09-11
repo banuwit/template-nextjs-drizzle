@@ -42,8 +42,8 @@ export function AuthChangePasswordDialog({
 
     toast.add({
       type: "success",
-      title: "Password diganti",
-      description: "Sesi di perangkat lain telah dikeluarkan.",
+      title: "Password changed",
+      description: "Sessions on other devices have been signed out.",
     })
     onClose()
   }, [state.ok, onClose])
@@ -56,9 +56,9 @@ export function AuthChangePasswordDialog({
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
-          <DialogTitle>Ganti Password</DialogTitle>
+          <DialogTitle>Change Password</DialogTitle>
           <DialogDescription>
-            Setelah diganti, semua perangkat lain akan otomatis logout.
+            After changing it, all other devices will be signed out.
           </DialogDescription>
         </DialogHeader>
 
@@ -66,7 +66,7 @@ export function AuthChangePasswordDialog({
           <FieldGroup>
             <Field data-invalid={currentErrors ? true : undefined}>
               <FieldLabel htmlFor="current-password">
-                Password saat ini
+                Current password
               </FieldLabel>
               <Input
                 id="current-password"
@@ -79,7 +79,7 @@ export function AuthChangePasswordDialog({
             </Field>
 
             <Field data-invalid={newErrors ? true : undefined}>
-              <FieldLabel htmlFor="new-password">Password baru</FieldLabel>
+              <FieldLabel htmlFor="new-password">New password</FieldLabel>
               <Input
                 id="new-password"
                 name="newPassword"
@@ -92,7 +92,7 @@ export function AuthChangePasswordDialog({
 
             <Field data-invalid={confirmErrors ? true : undefined}>
               <FieldLabel htmlFor="password-confirmation">
-                Konfirmasi password baru
+                Confirm new password
               </FieldLabel>
               <Input
                 id="password-confirmation"
@@ -114,11 +114,11 @@ export function AuthChangePasswordDialog({
               disabled={pending}
               onClick={onClose}
             >
-              Batal
+              Cancel
             </Button>
             <Button type="submit" disabled={pending}>
               {pending && <Spinner />}
-              Simpan
+              Save
             </Button>
           </div>
         </form>

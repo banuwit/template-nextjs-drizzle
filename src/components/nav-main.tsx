@@ -20,37 +20,30 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 
-export function NavMain({
-  items,
-}: {
-  items: {
-    title: string
-    url: string
-    icon?: LucideIcon
-    isActive?: boolean
-    items?: {
-      title: string
-      url: string
-    }[]
-  }[]
-}) {
+export type NavMainItem = {
+  title: string
+  url: string
+  icon?: LucideIcon
+  items?: { title: string; url: string }[]
+}
+
+function matches(pathname: string, url: string) {
+  return url !== "#" && (pathname === url || pathname.startsWith(`${url}/`))
+}
+
+export function NavMain({ items }: { items: NavMainItem[] }) {
   const pathname = usePathname()
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      <SidebarGroupLabel>Menu</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => {
-          const isActive =
-            item.isActive ||
-            (item.url !== "#" &&
-              (pathname === item.url || pathname.startsWith(`${item.url}/`)))
-
           if (!item.items?.length) {
             return (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
-                  isActive={isActive}
+                  isActive={matches(pathname, item.url)}
                   tooltip={item.title}
                   render={<Link href={item.url} />}
                 >
@@ -61,6 +54,10 @@ export function NavMain({
             )
           }
 
+          const isActive =
+            matches(pathname, item.url) ||
+            item.items.some((subItem) => matches(pathname, subItem.url))
+
           return (
             <Collapsible
               key={item.title}
@@ -69,7 +66,9 @@ export function NavMain({
               render={<SidebarMenuItem />}
             >
               <CollapsibleTrigger
-                render={<SidebarMenuButton tooltip={item.title} />}
+                render={
+                  <SidebarMenuButton tooltip={item.title} isActive={isActive} />
+                }
               >
                 {item.icon && <item.icon />}
                 <span>{item.title}</span>
@@ -79,7 +78,10 @@ export function NavMain({
                 <SidebarMenuSub>
                   {item.items.map((subItem) => (
                     <SidebarMenuSubItem key={subItem.title}>
-                      <SidebarMenuSubButton render={<Link href={subItem.url} />}>
+                      <SidebarMenuSubButton
+                        isActive={matches(pathname, subItem.url)}
+                        render={<Link href={subItem.url} />}
+                      >
                         <span>{subItem.title}</span>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>

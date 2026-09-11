@@ -36,7 +36,7 @@ export async function requireUser(): Promise<CurrentUser> {
   // Sesi user yang sudah di-soft-delete dianggap tidak ada (deleteUser juga
   // menghapus sesinya; ini jaring pengaman).
   if (!session || session.user.deletedAt) {
-    redirect("/")
+    redirect("/auth/expired")
   }
 
   const { id, name, email, image } = session.user

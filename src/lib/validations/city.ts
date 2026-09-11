@@ -8,10 +8,10 @@ import { z } from "zod"
 export const cityFormSchema = z.object({
   name: z
     .string()
-    .min(1, "Nama wajib diisi")
-    .max(255, "Nama maksimal 255 karakter"),
+    .min(1, "Name is required")
+    .max(255, "Name must be at most 255 characters"),
   code: z
     .string()
-    .length(2, "Kode harus 2 huruf")
-    .regex(/^[A-Z]{2}$/, "Kode harus 2 huruf A–Z"),
+    .length(2, "Code must be 2 letters")
+    .regex(/^[A-Z]{2}$/, "Code must be 2 letters A–Z"),
 })

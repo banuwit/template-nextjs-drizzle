@@ -40,7 +40,7 @@ function parseProvinceForm(formData: FormData): ParseResult {
 }
 
 const NAME_OR_CODE_TAKEN: ProvinceActionState["errors"] = {
-  form: ["Nama atau kode sudah terdaftar"],
+  form: ["Name or code is already registered"],
 }
 
 export async function createProvince(

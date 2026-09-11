@@ -43,8 +43,8 @@ export function CountryFormDialog({
           defaultValues={
             isEdit ? { name: country.name, code: country.code } : undefined
           }
-          submitLabel={isEdit ? "Save changes" : "Create country"}
-          successTitle={isEdit ? "Country updated" : "Country created"}
+          submitLabel={isEdit ? "Save Changes" : "Add New Country"}
+          successTitle={isEdit ? "Country Updated" : "Country Created"}
           onClose={onClose}
         />
       </DialogContent>

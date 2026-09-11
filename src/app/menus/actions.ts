@@ -66,7 +66,7 @@ function parseMenuForm(formData: FormData): ParseResult {
 }
 
 const SLUG_TAKEN: MenuActionState["errors"] = {
-  slug: ["Slug sudah dipakai menu lain"],
+  slug: ["Slug is already used by another menu"],
 }
 
 /**
@@ -86,7 +86,7 @@ async function resolveLevel(
   if (parentLevel === null) {
     return {
       ok: false,
-      state: { errors: { parentId: ["Menu induk tidak ditemukan"] } },
+      state: { errors: { parentId: ["Parent menu not found"] } },
     }
   }
 
@@ -173,6 +173,8 @@ export async function createMenu(
   }
 
   revalidatePath("/menus")
+  // Sidebar dirender dari tabel menus di layout — segarkan semua halaman.
+  revalidatePath("/", "layout")
   return { ok: true, values: parsed.data }
 }
 
@@ -201,8 +203,8 @@ export async function updateMenu(
         errors: {
           parentId: [
             parentId === id
-              ? "Menu tidak bisa menjadi induk dirinya sendiri"
-              : "Menu induk tidak boleh diambil dari turunannya sendiri",
+              ? "A menu cannot be its own parent"
+              : "A menu cannot use one of its descendants as parent",
           ],
         },
         values: parsed.data,
@@ -231,6 +233,8 @@ export async function updateMenu(
   await relevelDescendants(id, level.level)
 
   revalidatePath("/menus")
+  // Sidebar dirender dari tabel menus di layout — segarkan semua halaman.
+  revalidatePath("/", "layout")
   return { ok: true, values: parsed.data }
 }
 
@@ -245,7 +249,7 @@ export async function deleteMenu(id: string): Promise<void> {
   const ids = await listMenuSubtreeIds(id)
 
   if (ids.length === 0) {
-    throw new Error("Menu tidak ditemukan")
+    throw new Error("Menu not found")
   }
 
   await db
@@ -254,4 +258,6 @@ export async function deleteMenu(id: string): Promise<void> {
     .where(and(inArray(menus.id, ids), isNull(menus.deletedAt)))
 
   revalidatePath("/menus")
+  // Sidebar dirender dari tabel menus di layout — segarkan semua halaman.
+  revalidatePath("/", "layout")
 }

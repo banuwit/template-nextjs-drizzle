@@ -19,7 +19,7 @@ interface DataTableLoadingProps {
  * table's height.
  */
 export function DataTableLoading({
-  title = "Memuat data...",
+  title = "Loading data...",
   description = "Mohon tunggu sebentar.",
 }: DataTableLoadingProps) {
   return (

@@ -15,7 +15,12 @@ export async function AppSidebarHeader() {
         <SidebarTrigger className="-ml-1" />
       </div>
       <div className="flex items-center gap-2 px-4">
-        <Button variant="ghost" size="icon" className="rounded-full">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-full"
+          aria-label="Notifications"
+        >
           <BellIcon />
         </Button>
         <NavUser user={user} />

@@ -13,7 +13,7 @@ globs:
 
 Dokumen ini adalah **checklist umum & reusable** untuk membuat resource baru (tabel database + halaman list + CRUD), disarikan dari proses membangun Users / Countries / Provinces / Cities.
 
-Struktur penjelasan mengikuti [new-pages-pattern.md](../../new-pages-pattern.md) (urutan kerja + trap + referensi kanonik). **Implementasi di repo ini adalah Next.js 16 + Drizzle + PostgreSQL**, bukan Laravel/Inertia — jangan copy Artisan, Wayfinder, Policy, atau Pest.
+Struktur penjelasan mengikuti [new-pages-pattern.md](../../docs/legacy/new-pages-pattern.md) (urutan kerja + trap + referensi kanonik). **Implementasi di repo ini adalah Next.js 16 + Drizzle + PostgreSQL**, bukan Laravel/Inertia — jangan copy Artisan, Wayfinder, Policy, atau Pest.
 
 Untuk **empat varian UI** create/edit/view (Halaman baru, Dialog, Sheet, Panel inline), kontrak form, dan mode view: lihat [crud-pattern.md](./crud-pattern.md). Dokumen ini **tidak menduplikasi** isi itu — hanya urutan kerja + penjelasan tiap langkah + trap. **Selalu tanya dulu** keempat opsi sebelum scaffold create/edit/view.
 
@@ -36,13 +36,22 @@ Delete selalu `AlertDialog` di list, terlepas dari pilihan itu.
 Buat `src/db/schema/{table}.ts`. Ikuti gaya [`users.ts`](../../src/db/schema/users.ts) / [`cities.ts`](../../src/db/schema/cities.ts):
 
 ```ts
-import { pgTable, integer, varchar, timestamp } from "drizzle-orm/pg-core"
+import { sql } from "drizzle-orm"
+import { pgTable, uniqueIndex, varchar } from "drizzle-orm/pg-core"
 
-export const items = pgTable("items", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  name: varchar({ length: 255 }).notNull().unique(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-})
+import { auditColumns, identityColumns } from "./columns"
+
+export const items = pgTable(
+  "items",
+  {
+    ...identityColumns(), // internalId (integer PK) + id (uuid v7, publik)
+    name: varchar({ length: 255 }).notNull(),
+    ...auditColumns(), // created/updated/deleted _at + _by
+  },
+  (table) => [
+    uniqueIndex("items_name_unique").on(table.name).where(sql`${table.deletedAt} is null`),
+  ],
+)
 
 export type Item = typeof items.$inferSelect
 export type NewItem = typeof items.$inferInsert
@@ -55,7 +64,9 @@ Nama kolom ditulis **manual**, bukan lewat opsi `casing`:
 - Properti satu kata boleh tanpa argumen (`name`, `id`).
 - Properti multi-kata **wajib** argumen snake_case: `createdAt: timestamp("created_at")`. Tanpa itu kolom Postgres jadi `"createdAt"` dan harus selalu dikutip di SQL.
 
-FK ke tabel lain: `integer("author_id").references(() => users.id, { onDelete: "cascade" })` — arrow function mencegah import melingkar. `onDelete` harus disengaja (`cascade` / `restrict` / `set null`). `users.id` di project ini **integer identity**, bukan UUID.
+FK ke tabel lain: `uuid("author_id").references(() => users.id, { onDelete: "cascade" })` — arrow function mencegah import melingkar. `onDelete` harus disengaja (`cascade` / `restrict` / `set null`). Properti `id` di project ini adalah **uuid v7** (kolom `uuid`); `internalId` (integer) hanya untuk tie-breaker sort — jangan dipakai di URL/FK/action.
+
+Setiap fungsi `queries.ts` dan server action **wajib** diawali `await requireUser()` ([src/lib/session.ts](../../src/lib/session.ts)); soft delete = `set({ deletedAt, deletedBy })` dan setiap query memfilter `isNull(table.deletedAt)`.
 
 ### 2. Export dari barrel — paling sering terlupa
 
@@ -115,18 +126,18 @@ Unique clash: `isUniqueViolation(error)` → field/form error, bukan 500.
 
 - **Halaman baru** → copy [`src/app/users/`](../../src/app/users/) (`new/`, `[id]/`, `[id]/edit`, `[id]/not-found.tsx`).
 - **Dialog** → copy [`src/app/countries/`](../../src/app/countries/) (tanpa `new/` / `[id]/`).
-- **Sheet** → copy [`src/app/provinces/`](../../src/app/provinces/). Jangan ubah `src/components/ui/sheet.tsx`.
-- **Panel inline** → copy [`src/app/cities/`](../../src/app/cities/) (`{feature}-side-panel.tsx` + `{feature}-sheets.tsx`). Bukan Sheet.
+- **Sheet** → copy [`src/app/menus/`](../../src/app/menus/). Jangan ubah `src/components/ui/sheet.tsx`.
+- **Panel inline** → copy [`src/app/parameters/`](../../src/app/parameters/) (`{feature}-side-panel.tsx` + `{feature}-sheets.tsx`). Bukan Sheet.
 
 Setiap page: `metadata` / `generateMetadata`, `export const dynamic = "force-dynamic"`, `PageProps<"/{feature}">` (tipe ini hanya ada setelah `next dev` atau `next build`).
 
 Wajib `loading.tsx` (Skeleton) dan `error.tsx` (prop `retry`, bukan `reset` — Next.js 16).
 
-Copy UI bahasa Indonesia. Label nav/breadcrumb = nama fitur Inggris (cocok sidebar).
+Semua copy UI bahasa Inggris (label, placeholder, toast, pesan zod, error dari action). Label nav/breadcrumb = nama fitur (cocok sidebar).
 
 ### 7. Nav
 
-Tambah item di [`src/components/app-sidebar.tsx`](../../src/components/app-sidebar.tsx) (ikon Lucide + `url: "/{feature}"`). Di project ini tidak ada `app-header.tsx` terpisah seperti Laravel.
+Sidebar dirender dari tabel `menus`: tambah baris lewat `/menus` (dan di [`src/db/seed.ts`](../../src/db/seed.ts) supaya ikut di environment baru) dengan `routeName: "/{feature}"` dan `icon` = nama ikon lucide-react. Nama ikon baru harus didaftarkan di peta `ICONS` [`src/components/app-sidebar.tsx`](../../src/components/app-sidebar.tsx) (tidak dikenal → `CircleIcon`). Di project ini tidak ada `app-header.tsx` terpisah seperti Laravel.
 
 ### 8. Seed (opsional)
 
@@ -140,7 +151,7 @@ npm run lint
 npm run build    # rute DB harus ƒ, bukan ○
 ```
 
-Tidak ada test runner di repo ini — jangan mengasumsikan `npm test` atau Pest. Verifikasi HTTP: `GET /{feature}` 200; untuk Dialog/Sheet/panel, `GET /{feature}/new` dan `GET /{feature}/1` harus 404.
+Tidak ada test runner di repo ini — jangan mengasumsikan `npm test` atau Pest. Verifikasi HTTP: `GET /{feature}` 200; untuk Dialog/Sheet/panel, `GET /{feature}/new` dan `GET /{feature}/{uuid}` harus 404.
 
 Kalau UI berubah: buka halaman, exercise create/view/edit/delete, pastikan state konsisten. Panel inline: list menyusut, breadcrumb tetap penuh, klik luar tidak menutup.
 
@@ -157,7 +168,7 @@ Kalau UI berubah: buka halaman, exercise create/view/edit/delete, pastikan state
 - **`Button` + `Link`:** Base UI `Button` default `nativeButton={true}`. Render `<a>` tanpa `nativeButton={false}` → warning semantik. `<Button disabled render={<Link/>}>` jadi `<a disabled>` yang diabaikan browser — pakai `<button disabled>` polos (lihat `user-pagination.tsx`).
 - **`redirect()` di dalam `try`:** tertangkap sebagai error. Panggil di luar `try` setelah insert/update berhasil.
 - **`redirect()` pada Dialog/Sheet/panel:** overlay tidak sempat menutup dengan rapi; pakai `{ ok: true }`.
-- **Boolean `Switch`/`Checkbox` di FormData:** field unchecked **tidak terkirim**. Pola aman: `useState` + `<input type="hidden" name="…" value={on ? "1" : "0"} />` supaya nilai selalu eksplisit. (Sama seperti trap form native di [new-pages-pattern.md](../../new-pages-pattern.md).)
+- **Boolean `Switch`/`Checkbox` di FormData:** field unchecked **tidak terkirim**. Pola aman: `useState` + `<input type="hidden" name="…" value={on ? "1" : "0"} />` supaya nilai selalu eksplisit. (Sama seperti trap form native di [new-pages-pattern.md](../../docs/legacy/new-pages-pattern.md).)
 - **Field kompleks (JSON, color picker, …):** boleh ditunda dari UI iterasi pertama selama kolom sudah ada di schema/migrasi — jangan silently drop dari tabel. Catat TODO kalau relevan.
 - **Mengubah `src/components/ui/sheet.tsx` untuk panel inline:** dilarang. Buat `{feature}-side-panel.tsx` lokal.
 - **`useMemo` / `useCallback` / `memo` untuk performa:** React Compiler sudah nyala (`reactCompiler: true`). Jangan ditambah tangan.
@@ -172,7 +183,7 @@ Kalau UI berubah: buka halaman, exercise create/view/edit/delete, pastikan state
 |--------|--------|---------|
 | Halaman baru | [`src/app/users/`](../../src/app/users/) | `redirect()` on success; `getUserById` + `React.cache()` |
 | Dialog | [`src/app/countries/`](../../src/app/countries/) | Satu page; `{ ok: true }` |
-| Sheet | [`src/app/provinces/`](../../src/app/provinces/) | Overlay memblokir list |
-| Panel inline | [`src/app/cities/`](../../src/app/cities/) | List menyusut; bukan Sheet |
+| Sheet | [`src/app/menus/`](../../src/app/menus/) | Overlay memblokir list |
+| Panel inline | [`src/app/parameters/`](../../src/app/parameters/) | List menyusut; bukan Sheet |
 
-UX keempat opsi (Laravel, sebagai penjelasan): [crud-pattern-laravel.md](../../crud-pattern-laravel.md). Checklist Laravel asli (urutan + trap Eloquent): [new-pages-pattern.md](../../new-pages-pattern.md).
+UX keempat opsi (Laravel, sebagai penjelasan): [crud-pattern-laravel.md](../../docs/legacy/crud-pattern-laravel.md). Checklist Laravel asli (urutan + trap Eloquent): [new-pages-pattern.md](../../docs/legacy/new-pages-pattern.md).

@@ -35,9 +35,9 @@ export function AuthLoginForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Masuk ke akun Anda</CardTitle>
+        <CardTitle>Sign in to your account</CardTitle>
         <CardDescription>
-          Masukkan email dan password untuk melanjutkan.
+          Enter your email and password to continue.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -78,7 +78,7 @@ export function AuthLoginForm() {
             <Field>
               <Button type="submit" disabled={pending}>
                 {pending && <Spinner />}
-                Masuk
+                Sign in
               </Button>
             </Field>
           </FieldGroup>

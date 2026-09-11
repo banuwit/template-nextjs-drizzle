@@ -69,7 +69,7 @@ function parseParameterForm(formData: FormData): ParseResult {
       return {
         ok: false,
         state: {
-          errors: { attributes: ["JSON tidak valid"] },
+          errors: { attributes: ["Invalid JSON"] },
           values,
         },
       }
@@ -83,7 +83,7 @@ function parseParameterForm(formData: FormData): ParseResult {
       return {
         ok: false,
         state: {
-          errors: { attributes: ["Attributes harus objek JSON, mis. {\"icon\":\"star\"}"] },
+          errors: { attributes: ["Attributes must be a JSON object, e.g. {\"icon\":\"star\"}"] },
           values,
         },
       }
@@ -108,7 +108,7 @@ function parseParameterForm(formData: FormData): ParseResult {
 }
 
 const CODE_TAKEN: ParameterActionState["errors"] = {
-  code: ["Kode sudah terdaftar"],
+  code: ["Code is already registered"],
 }
 
 export async function createParameter(
@@ -183,11 +183,11 @@ export async function deleteParameter(id: string): Promise<void> {
     .limit(1)
 
   if (!row) {
-    throw new Error("Parameter tidak ditemukan")
+    throw new Error("Parameter not found")
   }
 
   if (row.isSystem) {
-    throw new Error("Parameter sistem tidak bisa dihapus")
+    throw new Error("System parameters cannot be deleted")
   }
 
   await db

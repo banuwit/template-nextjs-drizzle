@@ -30,7 +30,7 @@ export function UserGrid({
         perPage: USERS_PAGE_SIZE,
       }}
       toolbar={{
-        searches: [{ key: "search", placeholder: "Search by name…" }],
+        searches: [{ key: "search", placeholder: "Search by name..." }],
       }}
       emptyTitle="No users found."
       emptyFilteredTitle="No users found matching this search."

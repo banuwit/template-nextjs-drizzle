@@ -105,7 +105,7 @@ File bersama (bukan milik fitur):
 | `src/lib/db-errors.ts`        | `isUniqueViolation()`                                    |
 | `src/lib/form.ts`             | `toFieldErrors()`                                        |
 | `src/hooks/use-list-navigation.ts` | navigasi query-string untuk list server-driven      |
-| `src/components/app-sidebar.tsx` | item navigasi                                         |
+| baris `menus` (`/menus` + `src/db/seed.ts`) | item navigasi (ikon baru → peta `ICONS` di `app-sidebar.tsx`) |
 
 Aturan penamaan:
 
@@ -121,14 +121,23 @@ Aturan penamaan:
 `src/db/schema/{table}.ts`:
 
 ```ts
-import { pgTable, integer, varchar, timestamp } from "drizzle-orm/pg-core"
+import { sql } from "drizzle-orm"
+import { pgTable, uniqueIndex, varchar } from "drizzle-orm/pg-core"
 
-export const {table} = pgTable("{table}", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  name: varchar({ length: 255 }).notNull(),
-  code: varchar({ length: 2 }).notNull().unique(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-})
+import { auditColumns, identityColumns } from "./columns"
+
+export const {table} = pgTable(
+  "{table}",
+  {
+    ...identityColumns(), // internalId (integer PK) + id (uuid v7, publik)
+    name: varchar({ length: 255 }).notNull(),
+    code: varchar({ length: 2 }).notNull(),
+    ...auditColumns(), // created/updated/deleted _at + _by
+  },
+  (table) => [
+    uniqueIndex("{table}_code_unique").on(table.code).where(sql`${table.deletedAt} is null`),
+  ],
+)
 
 export type {Feature} = typeof {table}.$inferSelect
 export type New{Feature} = typeof {table}.$inferInsert
@@ -141,7 +150,9 @@ Aturan:
 - Kolom unique diberi `.unique()` supaya bentrok tertangkap DB, bukan lewat query cek manual yang punya race condition.
 - Kolom yang dipakai `WHERE` / `ORDER BY` diberi index.
 - Selalu ada `createdAt` — list default sort ke kolom ini.
-- FK: `integer("parent_id").references(() => parents.id, { onDelete: "cascade" })`. Arrow function mencegah import melingkar; `onDelete` harus disengaja.
+- FK: `uuid("parent_id").references(() => parents.id, { onDelete: "cascade" })`. Arrow function mencegah import melingkar; `onDelete` harus disengaja. Properti `id` = uuid v7 publik; `internalId` hanya untuk tie-breaker sort.
+- Unique memakai partial index `WHERE deleted_at IS NULL` supaya baris yang di-soft-delete tidak memblokir nilai yang sama.
+- **Auth:** setiap fungsi `queries.ts` dan server action wajib diawali `await requireUser()` ([src/lib/session.ts](../../src/lib/session.ts)); setiap query memfilter `isNull({table}.deletedAt)`.
 
 ## B.2 Barrel + migrasi
 
@@ -223,19 +234,22 @@ import type { Paginated } from "@/types/pagination"
 import type { {Feature}ListParams } from "./types"
 import { PAGE_SIZE } from "./utils"
 
-/** Satu baris; `undefined` kalau id bukan angka atau baris tidak ada. */
+/** Satu baris; `undefined` kalau id bukan uuid, tidak ada, atau sudah di-soft-delete. */
 export const get{Feature}ById = cache(
   async (rawId: string): Promise<{Feature} | undefined> => {
-    const id = Number(rawId)
+    await requireUser()
 
-    if (!Number.isInteger(id) || id <= 0) {
+    // Validasi dulu: Postgres melempar error (bukan "tidak ketemu") untuk teks bukan uuid.
+    const id = z.uuid().safeParse(rawId)
+
+    if (!id.success) {
       return undefined
     }
 
     const [row] = await db
       .select()
       .from({table})
-      .where(eq({table}.id, id))
+      .where(and(eq({table}.id, id.data), isNull({table}.deletedAt)))
       .limit(1)
 
     return row
@@ -345,8 +359,14 @@ export async function create{Feature}(
   // — DI LUAR try. Lihat catatan di bawah.
 }
 
-export async function delete{Feature}(id: number): Promise<void> {
-  await db.delete({table}).where(eq({table}.id, id))
+export async function delete{Feature}(id: string): Promise<void> {
+  const user = await requireUser()
+
+  // Soft delete: baris tetap ada, hilang dari list karena query memfilter deletedAt.
+  await db
+    .update({table})
+    .set({ deletedAt: new Date(), deletedBy: user.id })
+    .where(and(eq({table}.id, id), isNull({table}.deletedAt)))
   revalidatePath("/{features}")
 }
 ```
@@ -600,7 +620,7 @@ Prop-nya `retry`, **bukan** `reset` — itu perubahan Next.js 16.
 - Susunan: `Heading` + tombol Create, lalu komponen tabel (yang sudah membawa toolbar + tabel + pagination sebagai satu blok). Tidak perlu `CardHeader`/`CardFooter` terpisah kecuali user minta.
 - Breadcrumb di bawah judul `Heading` (bukan di header sidebar). Trails tetap dioper ke `AppLayout breadcrumbs={...}`.
 - Pakai `gap-*`, bukan `space-y-*`. Pakai token semantik (`text-muted-foreground`), bukan warna mentah.
-- Copy UI bahasa Indonesia. Label nav dan breadcrumb tetap nama fitur bahasa Inggris supaya cocok dengan sidebar.
+- Semua copy UI bahasa Inggris (label, placeholder, toast, pesan zod, error dari action). Label nav dan breadcrumb = nama fitur supaya cocok dengan sidebar (sidebar dirender dari tabel `menus` — tambahkan barisnya).
 
 ## D.4 Form create/edit
 
@@ -726,7 +746,7 @@ import { toast } from "@/components/ui/toast"
 
 import { delete{Feature} } from "../actions"
 
-export function {Feature}RowActions({ row }: { row: { id: number; name: string } }) {
+export function {Feature}RowActions({ row }: { row: { id: string; name: string } }) {
   const [confirmOpen, setConfirmOpen] = React.useState(false)
   const [pending, startTransition] = React.useTransition()
 
@@ -948,7 +968,7 @@ Aturan khusus:
 
 # Bagian F - Navigasi
 
-Tambah item di `src/components/app-sidebar.tsx` (ikon Lucide + `url: "/{features}"`). Tidak ada `app-header.tsx` terpisah di proyek ini.
+Sidebar dirender dari tabel `menus`: tambah baris lewat `/menus` dan di `src/db/seed.ts` (`routeName: "/{features}"`, `icon` = nama ikon lucide-react). Nama ikon baru didaftarkan di peta `ICONS` `src/components/app-sidebar.tsx`. Tidak ada `app-header.tsx` terpisah di proyek ini.
 
 ---
 
@@ -983,7 +1003,7 @@ npm run build     # rute yang query DB harus ƒ, bukan ○
 Verifikasi HTTP:
 
 - `GET /{features}` → 200
-- Pola overlay: `GET /{features}/new` dan `GET /{features}/1` → **404** (route-nya memang tidak dibuat)
+- Pola overlay: `GET /{features}/new` dan `GET /{features}/{uuid}` → **404** (route-nya memang tidak dibuat)
 - List: cari, sort, pindah halaman → URL berubah, baris ikut berubah, tombol Back mengembalikan state
 - Kembali ke halaman 1 menghapus param `page` dari URL
 
@@ -1007,7 +1027,7 @@ Kalau UI berubah, buka halamannya dan jalankan create/view/edit/delete. Panel in
 - [ ] `isUniqueViolation` mengubah bentrok unique jadi field error, bukan 500
 - [ ] Delete memakai `AlertDialog`, dirender sebagai saudara menu
 - [ ] Mode view tanpa tombol Edit/Close
-- [ ] Item nav ditambahkan di `app-sidebar.tsx`
+- [ ] Baris menu ditambahkan (`/menus` + `src/db/seed.ts`); ikon baru terdaftar di `ICONS` `app-sidebar.tsx`
 - [ ] `tsc` bersih, `lint` bersih, `build` sukses dengan rute `ƒ`
 
 # Jangan

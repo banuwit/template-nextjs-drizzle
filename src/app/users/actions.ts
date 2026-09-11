@@ -42,7 +42,7 @@ function parseUserForm(formData: FormData): ParseResult {
   return { ok: true, data: parsed.data }
 }
 
-const EMAIL_TAKEN: UserActionState["errors"] = { email: ["Email sudah terdaftar"] }
+const EMAIL_TAKEN: UserActionState["errors"] = { email: ["Email is already registered"] }
 
 export async function createUser(
   _prevState: UserActionState,
@@ -147,7 +147,7 @@ export async function deleteUser(id: string): Promise<void> {
   const currentUser = await requireUser()
 
   if (currentUser.id === id) {
-    throw new Error("Tidak bisa menghapus akun yang sedang dipakai login.")
+    throw new Error("You cannot delete the account you are signed in with.")
   }
 
   await db.transaction(async (tx) => {

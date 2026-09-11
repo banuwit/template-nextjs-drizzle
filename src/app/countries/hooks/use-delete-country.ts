@@ -17,14 +17,14 @@ export function useDeleteCountry(country: { id: string; name: string }) {
         setConfirmOpen(false)
         toast.add({
           type: "success",
-          title: "Negara dihapus",
-          description: `${country.name} sudah dihapus.`,
+          title: "Country deleted",
+          description: `${country.name} has been deleted.`,
         })
       } catch {
         toast.add({
           type: "error",
-          title: "Gagal menghapus negara",
-          description: "Coba lagi sebentar lagi.",
+          title: "Failed to delete country",
+          description: "Please try again shortly.",
         })
       }
     })

@@ -17,14 +17,14 @@ export function useDeleteCity(city: { id: string; name: string }) {
         setConfirmOpen(false)
         toast.add({
           type: "success",
-          title: "Kota dihapus",
-          description: `${city.name} sudah dihapus.`,
+          title: "City deleted",
+          description: `${city.name} has been deleted.`,
         })
       } catch {
         toast.add({
           type: "error",
-          title: "Gagal menghapus kota",
-          description: "Coba lagi sebentar lagi.",
+          title: "Failed to delete city",
+          description: "Please try again shortly.",
         })
       }
     })

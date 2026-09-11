@@ -19,7 +19,7 @@ interface DataGridLoadingProps {
  * grid's height.
  */
 export function DataGridLoading({
-  title = "Memuat data...",
+  title = "Loading data...",
   description = "Mohon tunggu sebentar.",
 }: DataGridLoadingProps) {
   return (

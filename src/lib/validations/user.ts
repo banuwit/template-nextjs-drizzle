@@ -10,11 +10,11 @@ import { passwordSchema } from "./auth"
 export const userFormSchema = z.object({
   name: z
     .string()
-    .min(1, "Nama wajib diisi")
-    .max(255, "Nama maksimal 255 karakter"),
+    .min(1, "Name is required")
+    .max(255, "Name must be at most 255 characters"),
   email: z
-    .email("Format email tidak valid")
-    .max(255, "Email maksimal 255 karakter"),
+    .email("Invalid email format")
+    .max(255, "Email must be at most 255 characters"),
 })
 
 /** Create user = field biasa + password awal. Edit tidak menyentuh password. */
@@ -24,6 +24,6 @@ export const userCreateSchema = userFormSchema
     passwordConfirmation: z.string(),
   })
   .refine((data) => data.password === data.passwordConfirmation, {
-    message: "Konfirmasi password tidak cocok",
+    message: "Password confirmation does not match",
     path: ["passwordConfirmation"],
   })

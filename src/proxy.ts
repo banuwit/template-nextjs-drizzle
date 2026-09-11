@@ -3,6 +3,8 @@ import { NextResponse, type NextRequest } from "next/server"
 
 const LOGIN_PATH = "/"
 const HOME_PATH = "/dashboard"
+// Pembersih cookie sesi mati (lihat src/app/auth/expired/route.ts).
+const EXPIRED_PATH = "/auth/expired"
 
 /**
  * Pengecekan optimistic: hanya melihat ada/tidaknya cookie sesi, tanpa query
@@ -11,6 +13,10 @@ const HOME_PATH = "/dashboard"
  * (src/lib/session.ts) yang dipanggil queries & actions.
  */
 export function proxy(request: NextRequest) {
+  if (request.nextUrl.pathname === EXPIRED_PATH) {
+    return NextResponse.next()
+  }
+
   const hasSession = Boolean(getSessionCookie(request))
   const isLoginPage = request.nextUrl.pathname === LOGIN_PATH
 
@@ -28,6 +34,6 @@ export function proxy(request: NextRequest) {
 export const config = {
   // Semua route kecuali endpoint Better Auth, aset Next.js, dan file statis.
   matcher: [
-    "/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    "/((?!api/auth|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?|txt)$).*)",
   ],
 }

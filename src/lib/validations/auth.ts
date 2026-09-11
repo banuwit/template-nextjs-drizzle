@@ -7,26 +7,26 @@ import { z } from "zod"
  */
 export const passwordSchema = z
   .string()
-  .min(8, "Password minimal 8 karakter")
-  .max(128, "Password maksimal 128 karakter")
+  .min(8, "Password must be at least 8 characters")
+  .max(128, "Password must be at most 128 characters")
 
 export const signInSchema = z.object({
-  email: z.email("Format email tidak valid"),
+  email: z.email("Invalid email format"),
   // Saat login cukup cek terisi: aturan panjang hanya relevan saat membuat password.
-  password: z.string().min(1, "Password wajib diisi"),
+  password: z.string().min(1, "Password is required"),
 })
 
 export const changePasswordSchema = z
   .object({
-    currentPassword: z.string().min(1, "Password saat ini wajib diisi"),
+    currentPassword: z.string().min(1, "Current password is required"),
     newPassword: passwordSchema,
     passwordConfirmation: z.string(),
   })
   .refine((data) => data.newPassword === data.passwordConfirmation, {
-    message: "Konfirmasi password tidak cocok",
+    message: "Password confirmation does not match",
     path: ["passwordConfirmation"],
   })
   .refine((data) => data.newPassword !== data.currentPassword, {
-    message: "Password baru harus berbeda dari password saat ini",
+    message: "New password must differ from the current password",
     path: ["newPassword"],
   })
