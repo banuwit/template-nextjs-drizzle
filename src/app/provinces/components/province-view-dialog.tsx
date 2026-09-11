@@ -34,14 +34,14 @@ export function ProvinceViewDialog({
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
           <DialogTitle>{province.name}</DialogTitle>
-          <DialogDescription>Detail provinsi.</DialogDescription>
+          <DialogDescription>Province details.</DialogDescription>
         </DialogHeader>
         <div>
           <DetailRow label="ID" value={String(province.id)} />
-          <DetailRow label="Nama" value={province.name} />
-          <DetailRow label="Kode" value={province.code} />
+          <DetailRow label="Name" value={province.name} />
+          <DetailRow label="Code" value={province.code} />
           <DetailRow
-            label="Dibuat"
+            label="Created"
             value={format(province.createdAt, "dd MMM yyyy, HH:mm")}
           />
         </div>

@@ -1,3 +1,4 @@
+import Heading from "@/components/heading"
 import { AppLayout } from "@/components/layouts/app-layout"
 
 export default function Page() {
@@ -8,13 +9,14 @@ export default function Page() {
         { label: "Data Fetching" },
       ]}
     >
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+      <div className="flex min-w-0 flex-1 flex-col gap-4 p-4">
+        <Heading title="Dashboard" />
         <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-          <div className="aspect-video rounded-xl bg-muted/50" />
-          <div className="aspect-video rounded-xl bg-muted/50" />
-          <div className="aspect-video rounded-xl bg-muted/50" />
+          <div className="aspect-video rounded-xl bg-white border" />
+          <div className="aspect-video rounded-xl bg-white border" />
+          <div className="aspect-video rounded-xl bg-white border" />
         </div>
-        <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
+        <div className="min-h-[100vh] flex-1 rounded-xl bg-white border md:min-h-min" />
       </div>
     </AppLayout>
   )

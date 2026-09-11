@@ -34,14 +34,14 @@ export function CountryViewDialog({
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
           <DialogTitle>{country.name}</DialogTitle>
-          <DialogDescription>Detail negara.</DialogDescription>
+          <DialogDescription>Country details.</DialogDescription>
         </DialogHeader>
         <div>
           <DetailRow label="ID" value={String(country.id)} />
-          <DetailRow label="Nama" value={country.name} />
-          <DetailRow label="Kode" value={country.code} />
+          <DetailRow label="Name" value={country.name} />
+          <DetailRow label="Code" value={country.code} />
           <DetailRow
-            label="Dibuat"
+            label="Created"
             value={format(country.createdAt, "dd MMM yyyy, HH:mm")}
           />
         </div>

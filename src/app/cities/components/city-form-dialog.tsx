@@ -28,11 +28,11 @@ export function CityFormDialog({
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Ubah kota" : "Kota baru"}</DialogTitle>
+          <DialogTitle>{isEdit ? "Edit City" : "Add New City"}</DialogTitle>
           <DialogDescription>
             {isEdit
-              ? `Ubah data ${city.name}.`
-              : "Tambahkan kota baru ke daftar."}
+              ? `Edit data for ${city.name}.`
+              : "Add new city to the list."}
           </DialogDescription>
         </DialogHeader>
         <CityForm
@@ -41,8 +41,8 @@ export function CityFormDialog({
           defaultValues={
             isEdit ? { name: city.name, code: city.code } : undefined
           }
-          submitLabel={isEdit ? "Simpan perubahan" : "Buat kota"}
-          successTitle={isEdit ? "Kota diubah" : "Kota dibuat"}
+          submitLabel={isEdit ? "Save Changes" : "Add New City"}
+          successTitle={isEdit ? "City Updated" : "City Created"}
           onClose={onClose}
         />
       </DialogContent>

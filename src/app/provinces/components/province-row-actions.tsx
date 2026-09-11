@@ -37,8 +37,8 @@ export function ProvinceRowActions({
           type="button"
           variant="ghost"
           size="icon-sm"
-          aria-label="Lihat"
-          title="Lihat"
+          aria-label="View"
+          title="View"
           onClick={() => onView(province)}
         >
           <EyeIcon />
@@ -47,8 +47,8 @@ export function ProvinceRowActions({
           type="button"
           variant="ghost"
           size="icon-sm"
-          aria-label="Ubah"
-          title="Ubah"
+          aria-label="Edit"
+          title="Edit"
           onClick={() => onEdit(province)}
         >
           <PencilIcon />
@@ -57,8 +57,8 @@ export function ProvinceRowActions({
           type="button"
           variant="ghost"
           size="icon-sm"
-          aria-label="Hapus"
-          title="Hapus"
+          aria-label="Delete"
+          title="Delete"
           className="text-destructive hover:bg-destructive/10 hover:text-destructive"
           onClick={() => setConfirmOpen(true)}
         >
@@ -69,21 +69,21 @@ export function ProvinceRowActions({
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Hapus {province.name}?</AlertDialogTitle>
+            <AlertDialogTitle>Delete {province.name}?</AlertDialogTitle>
             <AlertDialogDescription>
-              Provinsi ini akan dihapus permanen. Tindakan ini tidak bisa
-              dibatalkan.
+              This province will be permanently deleted. This action cannot be
+              undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={pending}>Batal</AlertDialogCancel>
+            <AlertDialogCancel disabled={pending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
               disabled={pending}
               onClick={confirmDelete}
             >
               {pending && <Spinner />}
-              Hapus
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

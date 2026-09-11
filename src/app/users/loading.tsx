@@ -6,13 +6,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 export default function UsersLoading() {
   return (
     <AppLayout breadcrumbs={[{ label: "Users" }]}>
-      <div className="flex h-full flex-1 flex-col gap-6 p-4">
+      <div className="flex h-full min-w-0 flex-1 flex-col gap-6 p-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <Heading
-            variant="small"
-            title="Users"
-            description="Kelola user yang terdaftar di workspace ini."
-          />
+          <Heading variant="small" title="Users" />
           <Skeleton className="h-9 w-28" />
         </div>
 

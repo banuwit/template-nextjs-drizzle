@@ -7,9 +7,18 @@ import type { NewUser } from "@/db/schema"
  */
 export type UserFormFields = Pick<NewUser, "name" | "email">
 
+/**
+ * Field form create. Password bukan kolom `users` (hash-nya di tabel accounts),
+ * jadi ditambahkan manual di sini, bukan lewat `Pick<NewUser, ...>`.
+ */
+export type UserCreateFields = UserFormFields & {
+  password: string
+  passwordConfirmation: string
+}
+
 /** Pesan error per field; `form` untuk error yang bukan milik satu field. */
 export type UserFormErrors = Partial<
-  Record<keyof UserFormFields | "form", string[]>
+  Record<keyof UserCreateFields | "form", string[]>
 >
 
 /**

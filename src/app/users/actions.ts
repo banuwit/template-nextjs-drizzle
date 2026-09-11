@@ -2,13 +2,15 @@
 
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
-import { eq } from "drizzle-orm"
+import { and, eq, isNull } from "drizzle-orm"
 import { z } from "zod"
 
 import { db } from "@/db"
-import { users } from "@/db/schema"
+import { accounts, sessions, users } from "@/db/schema"
+import { auth } from "@/lib/auth"
 import { isUniqueViolation } from "@/lib/db-errors"
-import { userFormSchema } from "@/lib/validations/user"
+import { requireUser } from "@/lib/session"
+import { userCreateSchema, userFormSchema } from "@/lib/validations/user"
 
 import type { UserActionState, UserFormFields } from "./types"
 
@@ -46,18 +48,55 @@ export async function createUser(
   _prevState: UserActionState,
   formData: FormData
 ): Promise<UserActionState> {
-  const parsed = parseUserForm(formData)
+  const currentUser = await requireUser()
 
-  if (!parsed.ok) {
-    return parsed.state
+  const values = {
+    name: String(formData.get("name") ?? "").trim(),
+    email: String(formData.get("email") ?? "")
+      .trim()
+      .toLowerCase(),
   }
 
+  const parsed = userCreateSchema.safeParse({
+    ...values,
+    password: String(formData.get("password") ?? ""),
+    passwordConfirmation: String(formData.get("passwordConfirmation") ?? ""),
+  })
+
+  if (!parsed.success) {
+    // Password tidak ikut dikembalikan: jangan kirim ulang rahasia ke client.
+    return { errors: z.flattenError(parsed.error).fieldErrors, values }
+  }
+
+  // Hash memakai hasher Better Auth supaya cocok saat signInEmail memverifikasi.
+  const passwordHash = await (await auth.$context).password.hash(
+    parsed.data.password
+  )
+
   try {
-    // `id` sengaja tidak dikirim: kolomnya generatedAlwaysAsIdentity.
-    await db.insert(users).values(parsed.data)
+    // User + akun credential dalam satu transaksi: tidak ada user tanpa password.
+    await db.transaction(async (tx) => {
+      // `internalId` dan `id` (uuid) sengaja tidak dikirim: diisi Postgres.
+      const [user] = await tx
+        .insert(users)
+        .values({
+          name: parsed.data.name,
+          email: parsed.data.email,
+          createdBy: currentUser.id,
+          updatedBy: currentUser.id,
+        })
+        .returning({ id: users.id })
+
+      await tx.insert(accounts).values({
+        userId: user!.id,
+        accountId: String(user!.id),
+        providerId: "credential",
+        password: passwordHash,
+      })
+    })
   } catch (error) {
     if (isUniqueViolation(error)) {
-      return { errors: EMAIL_TAKEN, values: parsed.data }
+      return { errors: EMAIL_TAKEN, values }
     }
     throw error
   }
@@ -67,11 +106,14 @@ export async function createUser(
   redirect("/users")
 }
 
+/** `id` = uuid user (lihat `identityColumns`). */
 export async function updateUser(
-  id: number,
+  id: string,
   _prevState: UserActionState,
   formData: FormData
 ): Promise<UserActionState> {
+  const currentUser = await requireUser()
+
   const parsed = parseUserForm(formData)
 
   if (!parsed.ok) {
@@ -79,7 +121,10 @@ export async function updateUser(
   }
 
   try {
-    await db.update(users).set(parsed.data).where(eq(users.id, id))
+    await db
+      .update(users)
+      .set({ ...parsed.data, updatedBy: currentUser.id })
+      .where(and(eq(users.id, id), isNull(users.deletedAt)))
   } catch (error) {
     if (isUniqueViolation(error)) {
       return { errors: EMAIL_TAKEN, values: parsed.data }
@@ -92,7 +137,27 @@ export async function updateUser(
   redirect(`/users/${id}`)
 }
 
-export async function deleteUser(id: number): Promise<void> {
-  await db.delete(users).where(eq(users.id, id))
+/**
+ * Soft delete + cabut semua sesi user itu, supaya ia langsung ter-logout.
+ * Login berikutnya ditolak hook `databaseHooks.session.create` di auth.ts.
+ * Baris accounts (password) dibiarkan: user bisa dipulihkan dengan
+ * mengosongkan `deleted_at`. Email tetap terpakai (unik global).
+ */
+export async function deleteUser(id: string): Promise<void> {
+  const currentUser = await requireUser()
+
+  if (currentUser.id === id) {
+    throw new Error("Tidak bisa menghapus akun yang sedang dipakai login.")
+  }
+
+  await db.transaction(async (tx) => {
+    await tx
+      .update(users)
+      .set({ deletedAt: new Date(), deletedBy: currentUser.id })
+      .where(and(eq(users.id, id), isNull(users.deletedAt)))
+
+    await tx.delete(sessions).where(eq(sessions.userId, id))
+  })
+
   revalidatePath("/users")
 }

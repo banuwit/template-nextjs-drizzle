@@ -4,31 +4,43 @@ import { cache } from "react"
 import {
   asc,
   count,
+  and,
   desc,
   eq,
   ilike,
-  or,
+  isNull,
   type AnyColumn,
-  type SQL,
 } from "drizzle-orm"
+import { z } from "zod"
 
 import { db } from "@/db"
 import { users, type User } from "@/db/schema"
 import { paginate } from "@/lib/pagination"
+import { requireUser } from "@/lib/session"
 import type { Paginated } from "@/types/pagination"
 
 import type { UserListParams, UserSortColumn } from "./types"
 
-/** Ambil satu user; `undefined` kalau id bukan angka atau baris tidak ada. */
+/**
+ * Ambil satu user berdasarkan uuid dari URL; `undefined` kalau bukan uuid,
+ * tidak ada, atau sudah di-soft-delete. Validasi format dulu: Postgres
+ * melempar error (bukan "tidak ketemu") untuk teks yang bukan uuid.
+ */
 export const getUserById = cache(
   async (rawId: string): Promise<User | undefined> => {
-    const id = Number(rawId)
+    await requireUser()
 
-    if (!Number.isInteger(id) || id <= 0) {
+    const id = z.uuid().safeParse(rawId)
+
+    if (!id.success) {
       return undefined
     }
 
-    const [user] = await db.select().from(users).where(eq(users.id, id)).limit(1)
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(and(eq(users.id, id.data), isNull(users.deletedAt)))
+      .limit(1)
 
     return user
   }
@@ -54,9 +66,12 @@ export async function listUsers({
   direction,
   perPage,
 }: UserListParams): Promise<Paginated<User>> {
-  const where: SQL | undefined = search
-    ? or(ilike(users.name, `%${search}%`), ilike(users.email, `%${search}%`))
-    : undefined
+  await requireUser()
+
+  const where = and(
+    isNull(users.deletedAt),
+    search ? ilike(users.name, `%${search}%`) : undefined
+  )
 
   const column = sortable[sort]
   const order = direction === "asc" ? asc(column) : desc(column)
@@ -67,7 +82,7 @@ export async function listUsers({
       .from(users)
       .where(where)
       // Tie-breaker menjaga urutan tetap stabil saat nilai kolom sort sama.
-      .orderBy(order, desc(users.id))
+      .orderBy(order, desc(users.internalId))
       .limit(perPage)
       .offset((page - 1) * perPage),
     db.select({ value: count() }).from(users).where(where),

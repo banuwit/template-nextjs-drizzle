@@ -71,7 +71,7 @@ export function MenuForm({
       type: "success",
       title: successTitle,
       description: state.values
-        ? `${state.values.name} tersimpan.`
+        ? `${state.values.name} saved.`
         : undefined,
     })
     onClose()
@@ -84,7 +84,7 @@ export function MenuForm({
     <form action={formAction} className="flex flex-col gap-6">
       <FieldGroup>
         <Field data-invalid={errors?.name ? true : undefined}>
-          <FieldLabel htmlFor="menu-name">Nama</FieldLabel>
+          <FieldLabel htmlFor="menu-name">Name</FieldLabel>
           <Input
             id="menu-name"
             name="name"
@@ -117,13 +117,13 @@ export function MenuForm({
             }}
           />
           <FieldDescription>
-            Unik. Otomatis mengikuti nama sampai diubah manual.
+            Unique. Follows the name automatically until edited manually.
           </FieldDescription>
           <FieldError errors={toFieldErrors(errors?.slug)} />
         </Field>
 
         <Field data-invalid={errors?.parentId ? true : undefined}>
-          <FieldLabel htmlFor="menu-parent">Menu induk</FieldLabel>
+          <FieldLabel htmlFor="menu-parent">Parent menu</FieldLabel>
           <NativeSelect
             id="menu-parent"
             name="parentId"
@@ -134,7 +134,7 @@ export function MenuForm({
             aria-invalid={errors?.parentId ? true : undefined}
           >
             <NativeSelectOption value="">
-              — Tanpa induk (menu utama) —
+              — No parent (top-level menu) —
             </NativeSelectOption>
             {parentOptions.map((option) => (
               <NativeSelectOption key={option.id} value={String(option.id)}>
@@ -143,14 +143,14 @@ export function MenuForm({
             ))}
           </NativeSelect>
           <FieldDescription>
-            Level dihitung otomatis dari induk yang dipilih.
+            Level is calculated automatically from the selected parent.
           </FieldDescription>
           <FieldError errors={toFieldErrors(errors?.parentId)} />
         </Field>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <Field data-invalid={errors?.icon ? true : undefined}>
-            <FieldLabel htmlFor="menu-icon">Ikon</FieldLabel>
+            <FieldLabel htmlFor="menu-icon">Icon</FieldLabel>
             <Input
               id="menu-icon"
               name="icon"
@@ -160,12 +160,12 @@ export function MenuForm({
               aria-invalid={errors?.icon ? true : undefined}
               defaultValue={values?.icon ?? defaultValues?.icon ?? ""}
             />
-            <FieldDescription>Nama ikon lucide-react.</FieldDescription>
+            <FieldDescription>lucide-react icon name.</FieldDescription>
             <FieldError errors={toFieldErrors(errors?.icon)} />
           </Field>
 
           <Field data-invalid={errors?.sortOrder ? true : undefined}>
-            <FieldLabel htmlFor="menu-sort-order">Urutan</FieldLabel>
+            <FieldLabel htmlFor="menu-sort-order">Order</FieldLabel>
             <Input
               id="menu-sort-order"
               name="sortOrder"
@@ -182,7 +182,7 @@ export function MenuForm({
         </div>
 
         <Field data-invalid={errors?.routeName ? true : undefined}>
-          <FieldLabel htmlFor="menu-route-name">Nama route</FieldLabel>
+          <FieldLabel htmlFor="menu-route-name">Route name</FieldLabel>
           <Input
             id="menu-route-name"
             name="routeName"
@@ -193,13 +193,13 @@ export function MenuForm({
             defaultValue={values?.routeName ?? defaultValues?.routeName ?? ""}
           />
           <FieldDescription>
-            Tujuan menu. Kosongkan untuk menu induk yang hanya menampung anak.
+            Menu destination. Leave empty for a parent menu that only holds children.
           </FieldDescription>
           <FieldError errors={toFieldErrors(errors?.routeName)} />
         </Field>
 
         <Field data-invalid={errors?.routePattern ? true : undefined}>
-          <FieldLabel htmlFor="menu-route-pattern">Pola route</FieldLabel>
+          <FieldLabel htmlFor="menu-route-pattern">Route pattern</FieldLabel>
           <Input
             id="menu-route-pattern"
             name="routePattern"
@@ -212,7 +212,7 @@ export function MenuForm({
             }
           />
           <FieldDescription>
-            Dipakai menandai menu aktif untuk URL turunannya.
+            Used to mark the menu active for its descendant URLs.
           </FieldDescription>
           <FieldError errors={toFieldErrors(errors?.routePattern)} />
         </Field>
@@ -235,7 +235,7 @@ export function MenuForm({
             ))}
           </datalist>
           <FieldDescription>
-            Tempat menu ini dirender, mis. `sidebar`.
+            Where this menu is rendered, e.g. `sidebar`.
           </FieldDescription>
           <FieldError errors={toFieldErrors(errors?.layout)} />
         </Field>
@@ -243,8 +243,8 @@ export function MenuForm({
         <MenuSwitchField
           id="menu-is-active"
           name="isActive"
-          label="Aktif"
-          description="Menu nonaktif tidak ikut dirender di sidebar."
+          label="Active"
+          description="Inactive menus are not rendered in the sidebar."
           defaultChecked={values?.isActive ?? defaultValues?.isActive ?? true}
         />
       </FieldGroup>
@@ -262,7 +262,7 @@ export function MenuForm({
           disabled={pending}
           onClick={onClose}
         >
-          Batal
+          Cancel
         </Button>
       </div>
     </form>

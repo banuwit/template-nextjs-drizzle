@@ -18,7 +18,7 @@ export async function generateMetadata({
   const user = await getUserById(id)
 
   return {
-    title: user ? `Ubah ${user.name}` : "Ubah user",
+    title: user ? `Edit ${user.name}` : "Edit user",
   }
 }
 
@@ -37,22 +37,18 @@ export default async function EditUserPage({
       breadcrumbs={[
         { label: "Users", href: "/users" },
         { label: user.name, href: `/users/${user.id}` },
-        { label: "Ubah" },
+        { label: "Edit" },
       ]}
     >
-      <div className="flex h-full flex-1 flex-col gap-6 p-4">
-        <Heading
-          variant="small"
-          title="Ubah user"
-          description={`Ubah data ${user.name}.`}
-        />
+      <div className="flex h-full min-w-0 flex-1 flex-col gap-6 p-4">
+        <Heading variant="small" title="Edit user" />
 
         <Card className="max-w-xl">
           <CardContent>
             <UserForm
               action={updateUser.bind(null, user.id)}
               defaultValues={{ name: user.name, email: user.email }}
-              submitLabel="Simpan perubahan"
+              submitLabel="Save changes"
               cancelHref={`/users/${user.id}`}
             />
           </CardContent>

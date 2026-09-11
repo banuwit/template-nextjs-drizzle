@@ -19,13 +19,13 @@ export default function ParametersError({
     <div className="flex min-h-svh flex-col items-center justify-center p-4">
       <Empty className="max-w-md border">
         <EmptyHeader>
-          <EmptyTitle>Gagal memuat parameters</EmptyTitle>
+          <EmptyTitle>Failed to load parameters</EmptyTitle>
           <EmptyDescription>
-            Terjadi kesalahan saat mengambil data. Coba muat ulang halaman ini.
+            Something went wrong while fetching data. Try reloading this page.
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
-          <Button onClick={() => retry()}>Coba lagi</Button>
+          <Button onClick={() => retry()}>Try again</Button>
         </EmptyContent>
       </Empty>
     </div>

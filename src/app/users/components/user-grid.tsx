@@ -30,10 +30,10 @@ export function UserGrid({
         perPage: USERS_PAGE_SIZE,
       }}
       toolbar={{
-        searches: [{ key: "search", placeholder: "Cari nama atau email…" }],
+        searches: [{ key: "search", placeholder: "Search by name…" }],
       }}
-      emptyTitle="Belum ada user."
-      emptyFilteredTitle="Tidak ada user yang cocok."
+      emptyTitle="No users found."
+      emptyFilteredTitle="No users found matching this search."
     />
   )
 }

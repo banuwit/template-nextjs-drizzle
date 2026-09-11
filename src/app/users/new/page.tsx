@@ -8,24 +8,20 @@ import { createUser } from "../actions"
 import { UserForm } from "../components/user-form"
 
 export const metadata: Metadata = {
-  title: "User baru",
+  title: "Add New User",
 }
 
 export default function NewUserPage() {
   return (
     <AppLayout
-      breadcrumbs={[{ label: "Users", href: "/users" }, { label: "Baru" }]}
+      breadcrumbs={[{ label: "Users", href: "/users" }, { label: "Add New" }]}
     >
-      <div className="flex h-full flex-1 flex-col gap-6 p-4">
-        <Heading
-          variant="small"
-          title="User baru"
-          description="Tambahkan user baru ke workspace."
-        />
+      <div className="flex h-full min-w-0 flex-1 flex-col gap-6 p-4">
+        <Heading variant="small" title="Add New User" />
 
         <Card className="max-w-xl">
           <CardContent>
-            <UserForm action={createUser} submitLabel="Buat user" />
+            <UserForm action={createUser} submitLabel="Save" withPassword />
           </CardContent>
         </Card>
       </div>

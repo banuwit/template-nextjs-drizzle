@@ -1,10 +1,11 @@
 import * as React from "react"
 
 import { AppSidebar } from "@/components/app-sidebar"
+import { AppSidebarHeader } from "@/components/app-sidebar-header"
 import {
-  AppSidebarHeader,
+  BreadcrumbProvider,
   type BreadcrumbEntry,
-} from "@/components/app-sidebar-header"
+} from "@/components/heading"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 
 export type { BreadcrumbEntry }
@@ -20,8 +21,10 @@ export function AppLayout({
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <AppSidebarHeader breadcrumbs={breadcrumbs} />
-        {children}
+        <BreadcrumbProvider breadcrumbs={breadcrumbs}>
+          <AppSidebarHeader />
+          {children}
+        </BreadcrumbProvider>
       </SidebarInset>
     </SidebarProvider>
   )

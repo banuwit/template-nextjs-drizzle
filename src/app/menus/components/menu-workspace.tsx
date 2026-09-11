@@ -39,11 +39,7 @@ export function MenuWorkspace({
 
   return (
     <>
-      <Heading
-        variant="small"
-        title="Menus"
-        description="Kelola struktur menu yang dirender di sidebar."
-      />
+      <Heading variant="small" title="Menus" />
 
       <Card className="gap-0 overflow-hidden py-0">
         <CardContent className="flex flex-col gap-4 p-4">

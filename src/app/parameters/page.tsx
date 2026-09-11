@@ -25,7 +25,7 @@ export default async function ParametersPage() {
 
   return (
     <AppLayout breadcrumbs={[{ label: "Parameters" }]}>
-      <div className="flex min-h-0 flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <ParameterWorkspace
           parameters={parameters}
           groups={groups}

@@ -6,7 +6,7 @@ import { toast } from "@/components/ui/toast"
 
 import { deleteProvince } from "../actions"
 
-export function useDeleteProvince(province: { id: number; name: string }) {
+export function useDeleteProvince(province: { id: string; name: string }) {
   const [confirmOpen, setConfirmOpen] = React.useState(false)
   const [pending, startTransition] = React.useTransition()
 

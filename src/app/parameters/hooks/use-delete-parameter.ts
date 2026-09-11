@@ -7,7 +7,7 @@ import { toast } from "@/components/ui/toast"
 import { deleteParameter } from "../actions"
 
 export function useDeleteParameter(parameter: {
-  id: number
+  id: string
   code: string
   isSystem: boolean
 }) {

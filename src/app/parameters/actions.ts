@@ -7,6 +7,7 @@ import { z } from "zod"
 import { db } from "@/db"
 import { parameters } from "@/db/schema"
 import { isUniqueViolation } from "@/lib/db-errors"
+import { requireUser } from "@/lib/session"
 import { parameterFormSchema } from "@/lib/validations/parameter"
 
 import type {
@@ -16,9 +17,8 @@ import type {
 } from "./types"
 
 /**
- * Kolom audit (`createdBy` / `updatedBy` / `deletedBy`) sengaja dibiarkan null:
- * project ini belum punya sesi auth, jadi tidak ada user id yang bisa dicatat.
- * Kolomnya sudah ada di schema — tinggal diisi begitu auth dipasang.
+ * Kolom audit (`createdBy` / `updatedBy` / `deletedBy`) diisi uuid user yang
+ * login, dari `requireUser()`.
  */
 
 /** Checkbox/Switch yang tidak tercentang TIDAK terkirim di FormData; form ini
@@ -115,6 +115,8 @@ export async function createParameter(
   _prevState: ParameterActionState,
   formData: FormData,
 ): Promise<ParameterActionState> {
+  const user = await requireUser()
+
   const parsed = parseParameterForm(formData)
 
   if (!parsed.ok) {
@@ -122,7 +124,9 @@ export async function createParameter(
   }
 
   try {
-    await db.insert(parameters).values(parsed.data)
+    await db
+      .insert(parameters)
+      .values({ ...parsed.data, createdBy: user.id, updatedBy: user.id })
   } catch (error) {
     if (isUniqueViolation(error)) {
       return { errors: CODE_TAKEN, values: parsed.values }
@@ -134,11 +138,14 @@ export async function createParameter(
   return { ok: true, values: parsed.values }
 }
 
+/** `id` = uuid parameter (lihat `identityColumns`). */
 export async function updateParameter(
-  id: number,
+  id: string,
   _prevState: ParameterActionState,
   formData: FormData,
 ): Promise<ParameterActionState> {
+  const user = await requireUser()
+
   const parsed = parseParameterForm(formData)
 
   if (!parsed.ok) {
@@ -148,7 +155,7 @@ export async function updateParameter(
   try {
     await db
       .update(parameters)
-      .set(parsed.data)
+      .set({ ...parsed.data, updatedBy: user.id })
       .where(and(eq(parameters.id, id), isNull(parameters.deletedAt)))
   } catch (error) {
     if (isUniqueViolation(error)) {
@@ -166,7 +173,9 @@ export async function updateParameter(
  * `is_system` dipakai kode lain, jadi ditolak di server — bukan hanya
  * disembunyikan tombolnya di UI.
  */
-export async function deleteParameter(id: number): Promise<void> {
+export async function deleteParameter(id: string): Promise<void> {
+  const user = await requireUser()
+
   const [row] = await db
     .select({ isSystem: parameters.isSystem })
     .from(parameters)
@@ -183,7 +192,7 @@ export async function deleteParameter(id: number): Promise<void> {
 
   await db
     .update(parameters)
-    .set({ deletedAt: new Date() })
+    .set({ deletedAt: new Date(), deletedBy: user.id })
     .where(and(eq(parameters.id, id), isNull(parameters.deletedAt)))
 
   revalidatePath("/parameters")

@@ -558,11 +558,7 @@ export default async function {Feature}sPage({
     <AppLayout breadcrumbs={[{ label: "{Features}" }]}>
       <div className="flex h-full flex-1 flex-col gap-6 p-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <Heading
-            variant="small"
-            title="{Features}"
-            description="Kelola {features} di workspace ini."
-          />
+          <Heading variant="small" title="{Features}" />
           {/* Tombol Create — bentuknya beda per pola, lihat Bagian E */}
         </div>
 
@@ -602,6 +598,7 @@ Prop-nya `retry`, **bukan** `reset` — itu perubahan Next.js 16.
 ## D.3 Layout dan copy
 
 - Susunan: `Heading` + tombol Create, lalu komponen tabel (yang sudah membawa toolbar + tabel + pagination sebagai satu blok). Tidak perlu `CardHeader`/`CardFooter` terpisah kecuali user minta.
+- Breadcrumb di bawah judul `Heading` (bukan di header sidebar). Trails tetap dioper ke `AppLayout breadcrumbs={...}`.
 - Pakai `gap-*`, bukan `space-y-*`. Pakai token semantik (`text-muted-foreground`), bukan warna mentah.
 - Copy UI bahasa Indonesia. Label nav dan breadcrumb tetap nama fitur bahasa Inggris supaya cocok dengan sidebar.
 

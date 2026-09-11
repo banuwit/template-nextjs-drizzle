@@ -34,14 +34,14 @@ export function CityViewDialog({
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
           <DialogTitle>{city.name}</DialogTitle>
-          <DialogDescription>Detail kota.</DialogDescription>
+          <DialogDescription>City details.</DialogDescription>
         </DialogHeader>
         <div>
           <DetailRow label="ID" value={String(city.id)} />
-          <DetailRow label="Nama" value={city.name} />
-          <DetailRow label="Kode" value={city.code} />
+          <DetailRow label="Name" value={city.name} />
+          <DetailRow label="Code" value={city.code} />
           <DetailRow
-            label="Dibuat"
+            label="Created"
             value={format(city.createdAt, "dd MMM yyyy, HH:mm")}
           />
         </div>

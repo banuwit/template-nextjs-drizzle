@@ -8,8 +8,8 @@ import type { MenuParentOption } from "../types"
  */
 export function collectSubtreeIds(
   options: MenuParentOption[],
-  id: number,
-): number[] {
+  id: string,
+): string[] {
   const collected = [id]
 
   for (let index = 0; index < collected.length; index += 1) {

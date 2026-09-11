@@ -47,26 +47,26 @@ export function MenuViewSheet({
       <SheetContent side="right" className="sm:max-w-md" showCloseButton>
         <SheetHeader>
           <SheetTitle>{menu.name}</SheetTitle>
-          <SheetDescription>Detail menu.</SheetDescription>
+          <SheetDescription>Menu details.</SheetDescription>
         </SheetHeader>
         <div className="overflow-y-auto px-4 pb-4">
           <DetailRow label="ID">{menu.id}</DetailRow>
           <DetailRow label="Slug">
             <span className="font-mono text-xs">{menu.slug}</span>
           </DetailRow>
-          <DetailRow label="Menu induk">
+          <DetailRow label="Parent menu">
             {menu.parentName ?? <Empty />}
           </DetailRow>
           <DetailRow label="Level">{menu.level}</DetailRow>
-          <DetailRow label="Ikon">{menu.icon ?? <Empty />}</DetailRow>
-          <DetailRow label="Nama route">
+          <DetailRow label="Icon">{menu.icon ?? <Empty />}</DetailRow>
+          <DetailRow label="Route name">
             {menu.routeName ? (
               <span className="font-mono text-xs">{menu.routeName}</span>
             ) : (
               <Empty />
             )}
           </DetailRow>
-          <DetailRow label="Pola route">
+          <DetailRow label="Route pattern">
             {menu.routePattern ? (
               <span className="font-mono text-xs">{menu.routePattern}</span>
             ) : (
@@ -78,14 +78,14 @@ export function MenuViewSheet({
           </DetailRow>
           <DetailRow label="Status">
             <Badge variant={menu.isActive ? "default" : "secondary"}>
-              {menu.isActive ? "Aktif" : "Nonaktif"}
+              {menu.isActive ? "Active" : "Inactive"}
             </Badge>
           </DetailRow>
-          <DetailRow label="Urutan">{menu.sortOrder}</DetailRow>
-          <DetailRow label="Dibuat">
+          <DetailRow label="Order">{menu.sortOrder}</DetailRow>
+          <DetailRow label="Created">
             {format(menu.createdAt, "dd MMM yyyy, HH:mm")}
           </DetailRow>
-          <DetailRow label="Diubah">
+          <DetailRow label="Updated">
             {format(menu.updatedAt, "dd MMM yyyy, HH:mm")}
           </DetailRow>
         </div>

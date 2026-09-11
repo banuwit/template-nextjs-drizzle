@@ -28,11 +28,11 @@ export function ProvinceFormDialog({
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Ubah provinsi" : "Provinsi baru"}</DialogTitle>
+          <DialogTitle>{isEdit ? "Edit Province" : "Add New Province"}</DialogTitle>
           <DialogDescription>
             {isEdit
-              ? `Ubah data ${province.name}.`
-              : "Tambahkan provinsi baru ke daftar."}
+              ? `Edit data for ${province.name}.`
+              : "Add new province to the list."}
           </DialogDescription>
         </DialogHeader>
         <ProvinceForm
@@ -43,8 +43,8 @@ export function ProvinceFormDialog({
           defaultValues={
             isEdit ? { name: province.name, code: province.code } : undefined
           }
-          submitLabel={isEdit ? "Simpan perubahan" : "Buat provinsi"}
-          successTitle={isEdit ? "Provinsi diubah" : "Provinsi dibuat"}
+          submitLabel={isEdit ? "Save Changes" : "Add New Province"}
+          successTitle={isEdit ? "Province Updated" : "Province Created"}
           onClose={onClose}
         />
       </DialogContent>

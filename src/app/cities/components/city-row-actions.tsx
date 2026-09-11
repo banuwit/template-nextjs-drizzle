@@ -37,8 +37,8 @@ export function CityRowActions({
           type="button"
           variant="ghost"
           size="icon-sm"
-          aria-label="Lihat"
-          title="Lihat"
+          aria-label="View"
+          title="View"
           onClick={() => onView(city)}
         >
           <EyeIcon />
@@ -47,8 +47,8 @@ export function CityRowActions({
           type="button"
           variant="ghost"
           size="icon-sm"
-          aria-label="Ubah"
-          title="Ubah"
+          aria-label="Edit"
+          title="Edit"
           onClick={() => onEdit(city)}
         >
           <PencilIcon />
@@ -57,8 +57,8 @@ export function CityRowActions({
           type="button"
           variant="ghost"
           size="icon-sm"
-          aria-label="Hapus"
-          title="Hapus"
+          aria-label="Delete"
+          title="Delete"
           className="text-destructive hover:bg-destructive/10 hover:text-destructive"
           onClick={() => setConfirmOpen(true)}
         >
@@ -69,21 +69,21 @@ export function CityRowActions({
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Hapus {city.name}?</AlertDialogTitle>
+            <AlertDialogTitle>Delete {city.name}?</AlertDialogTitle>
             <AlertDialogDescription>
-              Kota ini akan dihapus permanen. Tindakan ini tidak bisa
-              dibatalkan.
+              This city will be permanently deleted. This action cannot be
+              undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={pending}>Batal</AlertDialogCancel>
+            <AlertDialogCancel disabled={pending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
               disabled={pending}
               onClick={confirmDelete}
             >
               {pending && <Spinner />}
-              Hapus
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -6,7 +6,7 @@ import { toast } from "@/components/ui/toast"
 
 import { deleteMenu } from "../actions"
 
-export function useDeleteMenu(menu: { id: number; name: string }) {
+export function useDeleteMenu(menu: { id: string; name: string }) {
   const [confirmOpen, setConfirmOpen] = React.useState(false)
   const [pending, startTransition] = React.useTransition()
 

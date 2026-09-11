@@ -48,7 +48,7 @@ export function ParameterColorField({
         />
         <input
           type="color"
-          aria-label={`Pilih ${label.toLowerCase()}`}
+          aria-label={`Pick ${label.toLowerCase()}`}
           value={HEX.test(value) ? value : fallback}
           onChange={(event) => setValue(event.target.value)}
           className="size-9 shrink-0 cursor-pointer rounded-md border bg-background p-1"

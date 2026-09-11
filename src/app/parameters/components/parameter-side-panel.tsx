@@ -23,11 +23,22 @@ export function ParameterSidePanelLayout({
   open: boolean
 }) {
   return (
-    <div className="flex min-h-0 flex-1">
+    <div className="flex min-h-0 min-w-0 flex-1">
       <div className="min-w-0 flex-1">{children}</div>
       <div
         className={cn(
-          "flex min-h-0 shrink-0 flex-col overflow-hidden bg-background transition-[width] duration-200 ease-in-out",
+          // Halaman ini scroll sebagai satu dokumen (lihat `AppSidebarHeader`
+          // yang `sticky top-0`) — tidak ada leluhur dengan tinggi terikat,
+          // jadi `h-full` biasa tidak pernah membatasi apa pun. `sticky` +
+          // tinggi dalam satuan `svh` (relatif viewport, bukan leluhur)
+          // membuat kolom ini berperilaku seperti Sheet: menempel di bawah
+          // header aplikasi sambil membawa tinggi tetap, supaya body di
+          // dalamnya (lihat `ParameterSidePanelBody`) benar-benar punya
+          // batas untuk di-`overflow-auto`-kan. Angka `top-12`/`3rem` HARUS
+          // sama dengan `h-12` di `app-sidebar-header.tsx` — kalau tinggi
+          // header itu berubah, ubah juga di sini (selisihnya nongol sebagai
+          // gap antara header dan panel).
+          "sticky top-12 flex h-[calc(100svh-3rem)] shrink-0 flex-col overflow-hidden bg-background transition-[width] duration-200 ease-in-out",
           open ? "w-[28rem] max-w-full border-l" : "w-0",
         )}
         aria-hidden={!open}
@@ -44,26 +55,36 @@ export function ParameterSidePanelLayout({
   )
 }
 
+/**
+ * `actions` menggantikan tombol X bawaan — dipakai form create/edit supaya
+ * submit/batal ada di header, bukan footer terpisah. View panel (tanpa
+ * `actions`) tetap dapat tombol X seperti biasa.
+ */
 export function ParameterSidePanelHeader({
   children,
   onClose,
+  actions,
 }: {
   children: ReactNode
   onClose: () => void
+  actions?: ReactNode
 }) {
   return (
-    <div className="relative flex flex-col gap-0.5 border-b px-4 py-4 pr-12">
-      {children}
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-sm"
-        className="absolute top-3 right-3"
-        onClick={onClose}
-      >
-        <XIcon />
-        <span className="sr-only">Tutup</span>
-      </Button>
+    <div className="flex items-start justify-between gap-4 border-b px-4 py-4">
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">{children}</div>
+      <div className="flex shrink-0 items-center gap-2">
+        {actions ?? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            onClick={onClose}
+          >
+            <XIcon />
+            <span className="sr-only">Close</span>
+          </Button>
+        )}
+      </div>
     </div>
   )
 }
@@ -103,18 +124,6 @@ export function ParameterSidePanelBody({
   return (
     <div
       className={cn("min-h-0 flex-1 overflow-auto p-4", className)}
-      {...props}
-    />
-  )
-}
-
-export function ParameterSidePanelFooter({
-  className,
-  ...props
-}: ComponentProps<"div">) {
-  return (
-    <div
-      className={cn("mt-auto flex items-center gap-2 border-t p-4", className)}
       {...props}
     />
   )

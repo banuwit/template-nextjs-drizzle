@@ -48,19 +48,19 @@ export function MenuRowActions({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" />}>
-          <span className="sr-only">Buka menu</span>
+          <span className="sr-only">Open menu</span>
           <MoreHorizontalIcon />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuGroup>
-            <DropdownMenuLabel>Aksi</DropdownMenuLabel>
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem onClick={() => onView(menu)}>
               <EyeIcon />
-              Lihat
+              View
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onEdit(menu)}>
               <PencilIcon />
-              Ubah
+              Edit
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
@@ -70,7 +70,7 @@ export function MenuRowActions({
               onClick={() => setConfirmOpen(true)}
             >
               <Trash2Icon />
-              Hapus
+              Delete
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>
@@ -79,22 +79,22 @@ export function MenuRowActions({
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Hapus {menu.name}?</AlertDialogTitle>
+            <AlertDialogTitle>Delete {menu.name}?</AlertDialogTitle>
             <AlertDialogDescription>
-              Menu ini <strong>beserta seluruh submenunya</strong> akan ditandai
-              terhapus (soft delete) dan hilang dari daftar. Barisnya tetap ada
-              di database.
+              This menu <strong>and all of its submenus</strong> will be marked
+              as deleted (soft delete) and removed from the list. The rows
+              remain in the database.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={pending}>Batal</AlertDialogCancel>
+            <AlertDialogCancel disabled={pending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
               disabled={pending}
               onClick={confirmDelete}
             >
               {pending && <Spinner />}
-              Hapus
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

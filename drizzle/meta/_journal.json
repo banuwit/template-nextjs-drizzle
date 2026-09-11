@@ -5,43 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1788103879662,
-      "tag": "0000_cute_serpent_society",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1788109251313,
-      "tag": "0001_cool_impossible_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1788109595741,
-      "tag": "0002_short_maestro",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1788109979436,
-      "tag": "0003_third_onslaught",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1788906711144,
-      "tag": "0004_goofy_lord_hawal",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1788907342742,
-      "tag": "0005_amused_gauntlet",
+      "when": 1789112480670,
+      "tag": "0000_red_micromacro",
       "breakpoints": true
     }
   ]

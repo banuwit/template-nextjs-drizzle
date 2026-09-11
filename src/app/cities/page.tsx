@@ -18,7 +18,7 @@ export default async function CitiesPage() {
 
   return (
     <AppLayout breadcrumbs={[{ label: "Cities" }]}>
-      <div className="flex h-full flex-1 flex-col gap-6 p-4">
+      <div className="flex h-full min-w-0 flex-1 flex-col gap-6 p-4">
         <CityWorkspace cities={cities} />
       </div>
     </AppLayout>

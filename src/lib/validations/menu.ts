@@ -27,7 +27,8 @@ export const menuFormSchema = z.object({
   icon: optionalText(255, "Ikon"),
   routeName: optionalText(255, "Nama route"),
   routePattern: optionalText(255, "Pola route"),
-  parentId: z.number().int().positive().nullable(),
+  // uuid menu induk (lihat `identityColumns` di src/db/schema/columns.ts).
+  parentId: z.uuid("Menu induk tidak valid").nullable(),
   sortOrder: z
     .number("Urutan harus berupa angka")
     .int("Urutan harus bilangan bulat")

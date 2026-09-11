@@ -35,7 +35,7 @@ import { useDeleteUser } from "../hooks/use-delete-user"
 export function UserRowActions({
   user,
 }: {
-  user: { id: number; name: string }
+  user: { id: string; name: string }
 }) {
   const { confirmOpen, setConfirmOpen, pending, confirmDelete } =
     useDeleteUser(user)
@@ -44,19 +44,19 @@ export function UserRowActions({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" />}>
-          <span className="sr-only">Buka menu</span>
+          <span className="sr-only">Open menu</span>
           <MoreHorizontalIcon />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuGroup>
-            <DropdownMenuLabel>Aksi</DropdownMenuLabel>
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem render={<Link href={`/users/${user.id}`} />}>
               <EyeIcon />
-              Lihat
+              View
             </DropdownMenuItem>
             <DropdownMenuItem render={<Link href={`/users/${user.id}/edit`} />}>
               <PencilIcon />
-              Ubah
+              Edit
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
@@ -66,7 +66,7 @@ export function UserRowActions({
               onClick={() => setConfirmOpen(true)}
             >
               <Trash2Icon />
-              Hapus
+              Delete
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>
@@ -75,21 +75,21 @@ export function UserRowActions({
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Hapus {user.name}?</AlertDialogTitle>
+            <AlertDialogTitle>Delete {user.name}?</AlertDialogTitle>
             <AlertDialogDescription>
-              User ini akan dihapus permanen. Tindakan ini tidak bisa
-              dibatalkan.
+              This user will be permanently deleted. This action cannot be
+              undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={pending}>Batal</AlertDialogCancel>
+            <AlertDialogCancel disabled={pending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
               disabled={pending}
               onClick={confirmDelete}
             >
               {pending && <Spinner />}
-              Hapus
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

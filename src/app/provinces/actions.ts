@@ -1,12 +1,13 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { eq } from "drizzle-orm"
+import { and, eq, isNull } from "drizzle-orm"
 import { z } from "zod"
 
 import { db } from "@/db"
 import { provinces } from "@/db/schema"
 import { isUniqueViolation } from "@/lib/db-errors"
+import { requireUser } from "@/lib/session"
 import { provinceFormSchema } from "@/lib/validations/province"
 
 import type { ProvinceActionState, ProvinceFormFields } from "./types"
@@ -46,6 +47,8 @@ export async function createProvince(
   _prevState: ProvinceActionState,
   formData: FormData
 ): Promise<ProvinceActionState> {
+  const user = await requireUser()
+
   const parsed = parseProvinceForm(formData)
 
   if (!parsed.ok) {
@@ -53,7 +56,9 @@ export async function createProvince(
   }
 
   try {
-    await db.insert(provinces).values(parsed.data)
+    await db
+      .insert(provinces)
+      .values({ ...parsed.data, createdBy: user.id, updatedBy: user.id })
   } catch (error) {
     if (isUniqueViolation(error)) {
       return { errors: NAME_OR_CODE_TAKEN, values: parsed.data }
@@ -65,11 +70,14 @@ export async function createProvince(
   return { ok: true, values: parsed.data }
 }
 
+/** `id` = uuid province (lihat `identityColumns`). */
 export async function updateProvince(
-  id: number,
+  id: string,
   _prevState: ProvinceActionState,
   formData: FormData
 ): Promise<ProvinceActionState> {
+  const user = await requireUser()
+
   const parsed = parseProvinceForm(formData)
 
   if (!parsed.ok) {
@@ -77,7 +85,10 @@ export async function updateProvince(
   }
 
   try {
-    await db.update(provinces).set(parsed.data).where(eq(provinces.id, id))
+    await db
+      .update(provinces)
+      .set({ ...parsed.data, updatedBy: user.id })
+      .where(and(eq(provinces.id, id), isNull(provinces.deletedAt)))
   } catch (error) {
     if (isUniqueViolation(error)) {
       return { errors: NAME_OR_CODE_TAKEN, values: parsed.data }
@@ -89,7 +100,14 @@ export async function updateProvince(
   return { ok: true, values: parsed.data }
 }
 
-export async function deleteProvince(id: number): Promise<void> {
-  await db.delete(provinces).where(eq(provinces.id, id))
+/** Soft delete: baris hanya ditandai `deleted_at` / `deleted_by`. */
+export async function deleteProvince(id: string): Promise<void> {
+  const user = await requireUser()
+
+  await db
+    .update(provinces)
+    .set({ deletedAt: new Date(), deletedBy: user.id })
+    .where(and(eq(provinces.id, id), isNull(provinces.deletedAt)))
+
   revalidatePath("/provinces")
 }

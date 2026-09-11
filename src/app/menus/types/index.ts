@@ -33,10 +33,11 @@ export type MenuListRow = Menu & { parentName: string | null }
 
 /** Opsi induk di form; `level` dipakai untuk indentasi di dropdown. */
 export type MenuParentOption = {
-  id: number
+  /** uuid menu (lihat `identityColumns` di src/db/schema/columns.ts). */
+  id: string
   name: string
   level: number
-  parentId: number | null
+  parentId: string | null
 }
 
 export type MenuListParams = {

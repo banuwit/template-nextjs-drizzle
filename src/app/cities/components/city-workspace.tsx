@@ -30,11 +30,7 @@ export function CityWorkspace({
   return (
     <>
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <Heading
-          variant="small"
-          title="Cities"
-          description="Kelola kota yang tersedia di workspace ini."
-        />
+        <Heading variant="small" title="Cities" />
         <Button
           type="button"
           onClick={() => {
@@ -43,7 +39,7 @@ export function CityWorkspace({
           }}
         >
           <PlusIcon data-icon="inline-start" />
-          Kota baru
+          Add New
         </Button>
       </div>
 

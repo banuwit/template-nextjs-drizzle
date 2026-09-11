@@ -92,10 +92,25 @@ npm run db:studio     # browse/edit rows in a GUI
 
 - **Schema lives in `src/db/schema/` as a folder**, re-exported from `src/db/schema/index.ts`. `drizzle.config.ts` points at that barrel, so a table missing from it is silently skipped by migrations.
 - **Column names are written by hand**, not derived via the `casing` option: single-word properties may go bare (`name`, `email`), multi-word ones must pass an explicit snake_case argument (`createdAt: timestamp("created_at")`). Nothing enforces this — check the generated SQL before committing.
+- **Every domain table spreads `...identityColumns()` and `...auditColumns()`** from [src/db/schema/columns.ts](src/db/schema/columns.ts):
+  - Kolom `id` = integer identity PK, properti TS **`internalId`** — internal saja (tie-breaker sort), jangan dipakai di URL/action/relasi.
+  - Kolom `uuid` = UUID v7 (`uuidv7()`, butuh Postgres 18+), properti TS **`id`** — identitas publik. Semua FK, URL, dan argumen action memakai ini. Penamaan terbalik ini disengaja: Better Auth selalu membaca properti `id` pada model user.
+  - `created_at/by`, `updated_at/by`, `deleted_at/by` — kolom `*_by` = uuid user, diisi dari `requireUser()` di setiap action.
+- **Soft delete everywhere.** Tidak ada global scope: setiap query WAJIB `isNull(table.deletedAt)`, `update`/`delete` action juga memfilternya, dan "hapus" = `set({ deletedAt, deletedBy })`. Kolom unik memakai partial unique index `WHERE deleted_at IS NULL` (lihat `countries.ts`), kecuali `users.email` yang unik global karena Better Auth mencari user berdasarkan email tanpa filter.
+- Tabel Better Auth (`sessions`, `accounts`, `verifications`) dikecualikan dari kedua helper: id uuid biasa, hard delete oleh library.
 - **`src/db/index.ts` caches the `pg` Pool on `globalThis` in development.** Without it, every hot reload leaks a pool until Postgres refuses connections. Keep that pattern if you touch the file.
 - **`drizzle.config.ts` loads env via `@next/env`, not `dotenv`**, so drizzle-kit resolves `.env.local` / `.env` in the same order `next dev` does.
 - **Pages that query the database need `export const dynamic = "force-dynamic"`**, otherwise `next build` prerenders them and freezes the query result. Verify with the build output: the route should be `ƒ`, not `○`.
 - `drizzle/` — including `drizzle/meta/` — is committed; deleting it corrupts future migration diffs. `.env` is gitignored, `.env.example` is not.
+
+## Auth (Better Auth)
+
+- **Config tunggal di [src/lib/auth.ts](src/lib/auth.ts)** (Drizzle adapter, `usePlural`, `generateId: false` — id dibuat Postgres, email+password dengan `disableSignUp`). User yang di-soft-delete ditolak di `databaseHooks.session.create` dan di `requireUser()`; `deleteUser` juga menghapus sesinya. Tabel: `users` (model user) + [src/db/schema/auth.ts](src/db/schema/auth.ts) (`sessions`, `accounts`, `verifications`). Hash password ada di `accounts.password` (`providerId = "credential"`), bukan di `users`.
+- **`requireUser()` dari [src/lib/session.ts](src/lib/session.ts) wajib dipanggil di awal setiap fungsi `queries.ts` dan setiap server action.** [src/proxy.ts](src/proxy.ts) hanya cek optimistic (ada cookie atau tidak) — bukan pengaman data.
+- Login / logout / ganti password: server action di [src/app/auth/actions.ts](src/app/auth/actions.ts) memanggil `auth.api.*`; plugin `nextCookies()` yang menulis cookie. Tangkap `APIError` dari `better-auth/api` untuk jadi error form.
+- Rate limit bawaan Better Auth hanya berlaku untuk HTTP `/api/auth/*`, jadi login dibatasi manual lewat [src/lib/rate-limit.ts](src/lib/rate-limit.ts) (in-memory, per instance — ganti ke Redis/DB bila multi-instance).
+- User dibuat admin di `/users/new` beserta password awal (insert `users` + `accounts` dalam satu transaksi, hash lewat `(await auth.$context).password.hash`). Seed membuat `admin@example.com` / `password123`.
+- Env: `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` (lihat `.env.example`).
 
 ## Stack specifics that differ from older Next.js
 

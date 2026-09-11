@@ -30,11 +30,7 @@ export function CountryWorkspace({
   return (
     <>
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <Heading
-          variant="small"
-          title="Countries"
-          description="Kelola negara yang tersedia di workspace ini."
-        />
+        <Heading variant="small" title="Countries" />
         <Button
           type="button"
           onClick={() => {
@@ -43,7 +39,7 @@ export function CountryWorkspace({
           }}
         >
           <PlusIcon data-icon="inline-start" />
-          Negara baru
+          Add New
         </Button>
       </div>
 

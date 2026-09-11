@@ -30,11 +30,7 @@ export function ProvinceWorkspace({
   return (
     <>
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <Heading
-          variant="small"
-          title="Provinces"
-          description="Kelola provinsi yang tersedia di workspace ini."
-        />
+        <Heading variant="small" title="Provinces" />
         <Button
           type="button"
           onClick={() => {
@@ -43,7 +39,7 @@ export function ProvinceWorkspace({
           }}
         >
           <PlusIcon data-icon="inline-start" />
-          Provinsi baru
+          Add New
         </Button>
       </div>
 

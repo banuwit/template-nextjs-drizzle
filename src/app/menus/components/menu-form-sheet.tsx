@@ -28,7 +28,7 @@ export function MenuFormSheet({
   layouts: string[]
   nextSortOrder: number
   /** Id menu ini + seluruh turunannya; tidak boleh muncul sebagai pilihan induk. */
-  descendantIds: number[]
+  descendantIds: string[]
   onClose: () => void
 }) {
   const isEdit = mode === "edit" && menu
@@ -44,11 +44,11 @@ export function MenuFormSheet({
     <Sheet open onOpenChange={(open) => !open && onClose()}>
       <SheetContent side="right" className="sm:max-w-md" showCloseButton>
         <SheetHeader>
-          <SheetTitle>{isEdit ? "Ubah menu" : "Menu baru"}</SheetTitle>
+          <SheetTitle>{isEdit ? "Edit Menu" : "Add New Menu"}</SheetTitle>
           <SheetDescription>
             {isEdit
-              ? `Ubah data ${menu.name}.`
-              : "Tambahkan menu baru ke daftar."}
+              ? `Edit data for ${menu.name}.`
+              : "Add new menu to the list."}
           </SheetDescription>
         </SheetHeader>
         <div className="overflow-y-auto px-4 pb-4">
@@ -72,8 +72,8 @@ export function MenuFormSheet({
             }
             parentOptions={options}
             layouts={layouts}
-            submitLabel={isEdit ? "Simpan perubahan" : "Buat menu"}
-            successTitle={isEdit ? "Menu diubah" : "Menu dibuat"}
+            submitLabel={isEdit ? "Save Changes" : "Add New Menu"}
+            successTitle={isEdit ? "Menu Updated" : "Menu Created"}
             onClose={onClose}
           />
         </div>

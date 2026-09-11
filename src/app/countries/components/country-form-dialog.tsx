@@ -28,11 +28,11 @@ export function CountryFormDialog({
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Ubah negara" : "Negara baru"}</DialogTitle>
+          <DialogTitle>{isEdit ? "Edit Country" : "Add New Country"}</DialogTitle>
           <DialogDescription>
             {isEdit
-              ? `Ubah data ${country.name}.`
-              : "Tambahkan negara baru ke daftar."}
+              ? `Edit data for ${country.name}.`
+              : "Add new country to the list."}
           </DialogDescription>
         </DialogHeader>
         <CountryForm
@@ -43,8 +43,8 @@ export function CountryFormDialog({
           defaultValues={
             isEdit ? { name: country.name, code: country.code } : undefined
           }
-          submitLabel={isEdit ? "Simpan perubahan" : "Buat negara"}
-          successTitle={isEdit ? "Negara diubah" : "Negara dibuat"}
+          submitLabel={isEdit ? "Save changes" : "Create country"}
+          successTitle={isEdit ? "Country updated" : "Country created"}
           onClose={onClose}
         />
       </DialogContent>

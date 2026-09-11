@@ -13,8 +13,8 @@ interface DataGridEmptyProps {
 }
 
 export function DataGridEmpty({
-  title = "Tidak ada data",
-  description = "Belum ada data yang tersedia. Coba sesuaikan filter atau pencarian Anda.",
+  title = "No data",
+  description = "No data available yet. Try adjusting your filter or search.",
 }: DataGridEmptyProps) {
   return (
     <Empty className="border-0 py-12">

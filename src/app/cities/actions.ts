@@ -1,12 +1,13 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { eq } from "drizzle-orm"
+import { and, eq, isNull } from "drizzle-orm"
 import { z } from "zod"
 
 import { db } from "@/db"
 import { cities } from "@/db/schema"
 import { isUniqueViolation } from "@/lib/db-errors"
+import { requireUser } from "@/lib/session"
 import { cityFormSchema } from "@/lib/validations/city"
 
 import type { CityActionState, CityFormFields } from "./types"
@@ -46,6 +47,8 @@ export async function createCity(
   _prevState: CityActionState,
   formData: FormData
 ): Promise<CityActionState> {
+  const user = await requireUser()
+
   const parsed = parseCityForm(formData)
 
   if (!parsed.ok) {
@@ -53,7 +56,9 @@ export async function createCity(
   }
 
   try {
-    await db.insert(cities).values(parsed.data)
+    await db
+      .insert(cities)
+      .values({ ...parsed.data, createdBy: user.id, updatedBy: user.id })
   } catch (error) {
     if (isUniqueViolation(error)) {
       return { errors: NAME_OR_CODE_TAKEN, values: parsed.data }
@@ -65,11 +70,14 @@ export async function createCity(
   return { ok: true, values: parsed.data }
 }
 
+/** `id` = uuid city (lihat `identityColumns`). */
 export async function updateCity(
-  id: number,
+  id: string,
   _prevState: CityActionState,
   formData: FormData
 ): Promise<CityActionState> {
+  const user = await requireUser()
+
   const parsed = parseCityForm(formData)
 
   if (!parsed.ok) {
@@ -77,7 +85,10 @@ export async function updateCity(
   }
 
   try {
-    await db.update(cities).set(parsed.data).where(eq(cities.id, id))
+    await db
+      .update(cities)
+      .set({ ...parsed.data, updatedBy: user.id })
+      .where(and(eq(cities.id, id), isNull(cities.deletedAt)))
   } catch (error) {
     if (isUniqueViolation(error)) {
       return { errors: NAME_OR_CODE_TAKEN, values: parsed.data }
@@ -89,7 +100,14 @@ export async function updateCity(
   return { ok: true, values: parsed.data }
 }
 
-export async function deleteCity(id: number): Promise<void> {
-  await db.delete(cities).where(eq(cities.id, id))
+/** Soft delete: baris hanya ditandai `deleted_at` / `deleted_by`. */
+export async function deleteCity(id: string): Promise<void> {
+  const user = await requireUser()
+
+  await db
+    .update(cities)
+    .set({ deletedAt: new Date(), deletedBy: user.id })
+    .where(and(eq(cities.id, id), isNull(cities.deletedAt)))
+
   revalidatePath("/cities")
 }

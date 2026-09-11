@@ -26,16 +26,27 @@ import { MenuRowActions } from "./menu-row-actions"
  * dan fungsi tidak bisa dioper dari Server Component ke Client Component.
  */
 function buildColumns({
+  from,
   onView,
   onEdit,
 }: {
+  from: number | null
   onView: (menu: MenuListRow) => void
   onEdit: (menu: MenuListRow) => void
 }): DataTableColumn<MenuListRow>[] {
   return [
     {
+      key: "no",
+      header: "No.",
+      cell: (_row, index) => (
+        <span className="tabular-nums text-muted-foreground">
+          {(from ?? 1) + index}
+        </span>
+      ),
+    },
+    {
       key: "name",
-      header: "Nama",
+      header: "Name",
       cell: (row) => (
         <div className="flex items-center gap-1.5">
           {row.level > 0 && (
@@ -71,7 +82,7 @@ function buildColumns({
     },
     {
       key: "parent",
-      header: "Induk",
+      header: "Parent",
       cell: (row) =>
         row.parentName ?? <span className="text-muted-foreground">—</span>,
     },
@@ -98,13 +109,13 @@ function buildColumns({
       header: "Status",
       cell: (row) => (
         <Badge variant={row.isActive ? "default" : "secondary"}>
-          {row.isActive ? "Aktif" : "Nonaktif"}
+          {row.isActive ? "Active" : "Inactive"}
         </Badge>
       ),
     },
     {
       key: "sort_order",
-      header: "Urutan",
+      header: "Order",
       cell: (row) => (
         <span className="tabular-nums text-muted-foreground">
           {row.sortOrder}
@@ -115,7 +126,7 @@ function buildColumns({
     },
     {
       key: "created_at",
-      header: "Dibuat",
+      header: "Created",
       cell: (row) => (
         <span className="tabular-nums text-muted-foreground">
           {format(row.createdAt, "dd MMM yyyy")}
@@ -126,7 +137,7 @@ function buildColumns({
     },
     {
       key: "actions",
-      header: <span className="sr-only">Aksi</span>,
+      header: <span className="sr-only">Actions</span>,
       cell: (row) => (
         <MenuRowActions menu={row} onView={onView} onEdit={onEdit} />
       ),
@@ -153,7 +164,7 @@ export function MenuListTable({
 }) {
   return (
     <DataTableServer
-      columns={buildColumns({ onView, onEdit })}
+      columns={buildColumns({ from: paginated.from, onView, onEdit })}
       paginated={paginated}
       filters={filters}
       url="/menus"
@@ -164,7 +175,7 @@ export function MenuListTable({
         perPage: MENUS_PAGE_SIZE,
       }}
       toolbar={{
-        searches: [{ key: "search", placeholder: "Cari nama, slug, route..." }],
+        searches: [{ key: "search", placeholder: "Search by name..." }],
         facets: [
           {
             key: "layout",
@@ -178,9 +189,9 @@ export function MenuListTable({
             key: "status",
             title: "Status",
             options: [
-              { label: "Aktif", value: "active" },
-              { label: "Nonaktif", value: "inactive" },
-              { label: "Tanpa induk", value: "root" },
+              { label: "Active", value: "active" },
+              { label: "Inactive", value: "inactive" },
+              { label: "No parent", value: "root" },
             ],
           },
         ],
@@ -188,13 +199,13 @@ export function MenuListTable({
       actions={
         <Button type="button" onClick={onCreate}>
           <PlusIcon data-icon="inline-start" />
-          Menu baru
+          Add New
         </Button>
       }
-      emptyTitle="Belum ada menu."
-      emptyDescription="Tambahkan menu pertama lewat tombol Menu baru."
-      emptyFilteredTitle="Tidak ada menu yang cocok dengan filter ini."
-      emptyFilteredDescription="Ubah kata kunci atau bersihkan filter."
+      emptyTitle="No menus found."
+      emptyDescription="Add the first menu through the Add New button."
+      emptyFilteredTitle="No menus found matching this filter."
+      emptyFilteredDescription="Change the search term or clear the filter."
     />
   )
 }

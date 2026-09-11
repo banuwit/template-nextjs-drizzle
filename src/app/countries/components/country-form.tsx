@@ -46,7 +46,7 @@ export function CountryForm({
       type: "success",
       title: successTitle,
       description: state.values
-        ? `${state.values.name} (${state.values.code}) tersimpan.`
+        ? `${state.values.name} (${state.values.code}) saved.`
         : undefined,
     })
     onClose()
@@ -56,10 +56,16 @@ export function CountryForm({
   const codeErrors = state.errors?.code
 
   return (
-    <form action={formAction} className="flex flex-col gap-6">
+    // key: mount ulang saat action mengembalikan nilai baru, supaya Base UI
+    // tidak melihat defaultValue berubah pada input yang sudah ter-mount.
+    <form
+      key={JSON.stringify(state.values ?? null)}
+      action={formAction}
+      className="flex flex-col gap-6"
+    >
       <FieldGroup>
         <Field data-invalid={nameErrors ? true : undefined}>
-          <FieldLabel htmlFor="country-name">Nama</FieldLabel>
+          <FieldLabel htmlFor="country-name">Name</FieldLabel>
           <Input
             id="country-name"
             name="name"
@@ -72,7 +78,7 @@ export function CountryForm({
         </Field>
 
         <Field data-invalid={codeErrors ? true : undefined}>
-          <FieldLabel htmlFor="country-code">Kode</FieldLabel>
+          <FieldLabel htmlFor="country-code">Code</FieldLabel>
           <Input
             id="country-code"
             name="code"
@@ -95,7 +101,7 @@ export function CountryForm({
           {submitLabel}
         </Button>
         <Button type="button" variant="ghost" disabled={pending} onClick={onClose}>
-          Batal
+          Cancel
         </Button>
       </div>
     </form>

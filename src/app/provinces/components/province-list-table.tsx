@@ -40,7 +40,7 @@ function buildColumns({
     },
     {
       key: "name",
-      header: "Nama",
+      header: "Name",
       sortable: true,
       cell: (row) => (
         <button
@@ -54,8 +54,9 @@ function buildColumns({
     },
     {
       key: "code",
-      header: "Kode",
+      header: "Code",
       sortable: true,
+      searchable: false,
       cell: (row) => (
         <span className="tabular-nums text-muted-foreground">
           {row.code}
@@ -64,7 +65,7 @@ function buildColumns({
     },
     {
       key: "createdAt",
-      header: "Dibuat",
+      header: "Created",
       sortable: true,
       align: "right",
       // Tanpa ini, pencarian gabungan ikut mencocokkan `String(Date)` — yang
@@ -79,7 +80,7 @@ function buildColumns({
     },
     {
       key: "actions",
-      header: <span className="sr-only">Aksi</span>,
+      header: <span className="sr-only">Actions</span>,
       align: "right",
       headClassName: "w-28",
       cell: (row) => (
@@ -106,12 +107,12 @@ export function ProvinceListTable({
       pagination="none"
       defaultSort={{ key: "createdAt", direction: "desc" }}
       toolbar={{
-        searches: [{ key: "search", placeholder: "Cari nama atau kode..." }],
+        searches: [{ key: "search", placeholder: "Search by name..." }],
       }}
-      emptyTitle="Belum ada provinsi."
-      emptyDescription="Tambahkan provinsi pertama lewat tombol Provinsi baru."
-      emptyFilteredTitle="Tidak ada provinsi yang cocok dengan pencarian ini."
-      emptyFilteredDescription="Ubah kata kunci pencarian."
+      emptyTitle="No provinces found."
+      emptyDescription="Add the first province through the Add New button."
+      emptyFilteredTitle="No provinces found matching this search."
+      emptyFilteredDescription="Change the search term or clear the filter."
     />
   )
 }

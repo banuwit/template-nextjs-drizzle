@@ -39,7 +39,7 @@ export default async function MenusPage({
 
   return (
     <AppLayout breadcrumbs={[{ label: "Menus" }]}>
-      <div className="flex h-full flex-1 flex-col gap-6 p-4">
+      <div className="flex h-full min-w-0 flex-1 flex-col gap-6 p-4">
         <MenuWorkspace
           paginated={paginated}
           // `sort` / `direction` dikirim dalam bentuk yang sudah di-resolve,

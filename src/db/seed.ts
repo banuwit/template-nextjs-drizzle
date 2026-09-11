@@ -1,8 +1,11 @@
 import { loadEnvConfig } from "@next/env"
+import { hashPassword } from "better-auth/crypto"
+import { and, eq, inArray } from "drizzle-orm"
 import { drizzle } from "drizzle-orm/node-postgres"
 import { Pool } from "pg"
 
 import {
+  accounts,
   cities,
   countries,
   menus,
@@ -12,6 +15,10 @@ import {
 } from "./schema"
 
 loadEnvConfig(process.cwd())
+
+/** Akun login untuk development. Ganti password segera di lingkungan bersama. */
+const ADMIN_USER = { name: "Administrator", email: "admin@example.com" }
+const DEFAULT_PASSWORD = "password123"
 
 const SAMPLE_USERS = [
   { name: "Budi Santoso", email: "budi.santoso@example.com" },
@@ -215,6 +222,50 @@ async function seed() {
       .onConflictDoNothing({ target: users.email })
       .returning({ email: users.email })
 
+    await db
+      .insert(users)
+      .values(ADMIN_USER)
+      .onConflictDoNothing({ target: users.email })
+
+    // Akun credential untuk admin + sample users yang belum punya password.
+    // Hash memakai hasher Better Auth supaya bisa diverifikasi saat login.
+    const seededEmails = [ADMIN_USER.email, ...SAMPLE_USERS.map((u) => u.email)]
+    const seededUsers = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(inArray(users.email, seededEmails))
+    const withPassword = await db
+      .select({ userId: accounts.userId })
+      .from(accounts)
+      .where(
+        and(
+          eq(accounts.providerId, "credential"),
+          inArray(
+            accounts.userId,
+            seededUsers.map((u) => u.id)
+          )
+        )
+      )
+    const hasPassword = new Set(withPassword.map((a) => a.userId))
+    const missing = seededUsers.filter((u) => !hasPassword.has(u.id))
+
+    if (missing.length > 0) {
+      const passwordHash = await hashPassword(DEFAULT_PASSWORD)
+
+      await db.insert(accounts).values(
+        missing.map((u) => ({
+          userId: u.id,
+          accountId: String(u.id),
+          providerId: "credential",
+          password: passwordHash,
+        }))
+      )
+    }
+
+    console.log(
+      `Seed accounts: ${missing.length} password baru (login: ${ADMIN_USER.email} / ${DEFAULT_PASSWORD}).`
+    )
+
     const insertedCountries = await db
       .insert(countries)
       .values(
@@ -225,7 +276,9 @@ async function seed() {
           ),
         }))
       )
-      .onConflictDoNothing({ target: countries.code })
+      // Tanpa `target`: `code` dijaga partial unique index (WHERE deleted_at IS
+      // NULL), dan ON CONFLICT (code) tanpa predikat yang sama ditolak Postgres.
+      .onConflictDoNothing()
       .returning({ code: countries.code })
 
     console.log(
@@ -245,7 +298,7 @@ async function seed() {
           ),
         }))
       )
-      .onConflictDoNothing({ target: provinces.code })
+      .onConflictDoNothing()
       .returning({ code: provinces.code })
 
     console.log(
@@ -260,7 +313,7 @@ async function seed() {
           createdAt: new Date(now - (SAMPLE_CITIES.length - 1 - index) * day),
         }))
       )
-      .onConflictDoNothing({ target: cities.code })
+      .onConflictDoNothing()
       .returning({ code: cities.code })
 
     console.log(
@@ -277,7 +330,7 @@ async function seed() {
           ),
         }))
       )
-      .onConflictDoNothing({ target: parameters.code })
+      .onConflictDoNothing()
       .returning({ code: parameters.code })
 
     console.log(
@@ -315,7 +368,7 @@ async function seed() {
           sortOrder: index,
           createdAt: new Date(now - (SAMPLE_MENUS.length - 1 - index) * day),
         })
-        .onConflictDoNothing({ target: menus.slug })
+        .onConflictDoNothing()
         .returning({ id: menus.id, slug: menus.slug })
 
       if (inserted) {

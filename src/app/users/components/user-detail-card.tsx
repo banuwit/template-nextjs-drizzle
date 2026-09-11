@@ -19,10 +19,10 @@ export function UserDetailCard({ user }: { user: User }) {
     <Card className="max-w-xl">
       <CardContent>
         <DetailRow label="ID" value={String(user.id)} />
-      <DetailRow label="Nama" value={user.name} />
+      <DetailRow label="Name" value={user.name} />
       <DetailRow label="Email" value={user.email} />
       <DetailRow
-        label="Dibuat"
+        label="Created"
           value={format(user.createdAt, "dd MMM yyyy, HH:mm")}
         />
       </CardContent>

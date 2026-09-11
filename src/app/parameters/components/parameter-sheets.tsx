@@ -76,33 +76,27 @@ function ParameterFormPanel({
   const isEdit = mode === "edit" && parameter
 
   return (
-    <>
-      <ParameterSidePanelHeader onClose={onClose}>
-        <ParameterSidePanelTitle>
-          {isEdit ? "Ubah parameter" : "Parameter baru"}
-        </ParameterSidePanelTitle>
-        <ParameterSidePanelDescription>
-          {isEdit
-            ? `Ubah data ${parameter.code}.`
-            : "Tambahkan parameter baru ke daftar."}
-        </ParameterSidePanelDescription>
-      </ParameterSidePanelHeader>
-      <ParameterForm
-        key={isEdit ? `edit-${parameter.id}` : "create"}
-        action={
-          isEdit ? updateParameter.bind(null, parameter.id) : createParameter
-        }
-        defaultValues={
-          isEdit
-            ? toFormValues(parameter)
-            : { sortOrder: nextSortOrder, isActive: true }
-        }
-        groups={groups}
-        submitLabel={isEdit ? "Simpan perubahan" : "Buat parameter"}
-        successTitle={isEdit ? "Parameter diubah" : "Parameter dibuat"}
-        onClose={onClose}
-      />
-    </>
+    <ParameterForm
+      key={isEdit ? `edit-${parameter.id}` : "create"}
+      title={isEdit ? "Edit Parameter" : "Add New Parameter"}
+      description={
+        isEdit
+          ? `Edit data for ${parameter.code}.`
+          : "Add new parameter to the list."
+      }
+      action={
+        isEdit ? updateParameter.bind(null, parameter.id) : createParameter
+      }
+      defaultValues={
+        isEdit
+          ? toFormValues(parameter)
+          : { sortOrder: nextSortOrder, isActive: true }
+      }
+      groups={groups}
+      submitLabel={isEdit ? "Save Changes" : "Add New"}
+      successTitle={isEdit ? "Parameter Updated" : "Parameter Created"}
+      onClose={onClose}
+    />
   )
 }
 
@@ -118,22 +112,22 @@ function ParameterViewPanel({
       <ParameterSidePanelHeader onClose={onClose}>
         <ParameterSidePanelTitle>{parameter.code}</ParameterSidePanelTitle>
         <ParameterSidePanelDescription>
-          Detail parameter.
+          Parameter details.
         </ParameterSidePanelDescription>
       </ParameterSidePanelHeader>
       <ParameterSidePanelBody>
         <DetailRow label="ID">{parameter.id}</DetailRow>
-        <DetailRow label="Grup">{parameter.group}</DetailRow>
-        <DetailRow label="Kode">{parameter.code}</DetailRow>
-        <DetailRow label="Nilai">
+        <DetailRow label="Group">{parameter.group}</DetailRow>
+        <DetailRow label="Code">{parameter.code}</DetailRow>
+        <DetailRow label="Value">
           <ParameterValueBadge parameter={parameter} />
         </DetailRow>
-        <DetailRow label="Deskripsi">
+        <DetailRow label="Description">
           {parameter.description ?? (
             <span className="text-muted-foreground">—</span>
           )}
         </DetailRow>
-        <DetailRow label="Warna">
+        <DetailRow label="Color">
           <span className="font-mono text-xs text-muted-foreground">
             {parameter.textColor ?? "—"} / {parameter.bgColor ?? "—"}
           </span>
@@ -150,16 +144,16 @@ function ParameterViewPanel({
         <DetailRow label="Status">
           <div className="flex flex-wrap gap-1.5">
             <Badge variant={parameter.isActive ? "default" : "secondary"}>
-              {parameter.isActive ? "Aktif" : "Nonaktif"}
+              {parameter.isActive ? "Active" : "Inactive"}
             </Badge>
-            {parameter.isSystem && <Badge variant="outline">Sistem</Badge>}
+            {parameter.isSystem && <Badge variant="outline">System</Badge>}
           </div>
         </DetailRow>
-        <DetailRow label="Urutan">{parameter.sortOrder}</DetailRow>
-        <DetailRow label="Dibuat">
+        <DetailRow label="Order">{parameter.sortOrder}</DetailRow>
+        <DetailRow label="Created">
           {format(parameter.createdAt, "dd MMM yyyy, HH:mm")}
         </DetailRow>
-        <DetailRow label="Diubah">
+        <DetailRow label="Updated">
           {format(parameter.updatedAt, "dd MMM yyyy, HH:mm")}
         </DetailRow>
       </ParameterSidePanelBody>

@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { UsersIcon } from "lucide-react"
 
+import Heading from "@/components/heading"
 import { AppLayout } from "@/components/layouts/app-layout"
 import { Button } from "@/components/ui/button"
 import {
@@ -17,23 +18,24 @@ export default function UserNotFound() {
     <AppLayout
       breadcrumbs={[
         { label: "Users", href: "/users" },
-        { label: "Tidak ditemukan" },
+        { label: "Not found" },
       ]}
     >
-      <div className="flex h-full flex-1 flex-col gap-6 p-4">
+      <div className="flex h-full min-w-0 flex-1 flex-col gap-6 p-4">
+        <Heading variant="small" title="Not found" />
         <Empty className="flex-1 border">
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <UsersIcon />
             </EmptyMedia>
-            <EmptyTitle>User tidak ditemukan</EmptyTitle>
+            <EmptyTitle>User not found</EmptyTitle>
             <EmptyDescription>
-              User ini tidak ada atau sudah dihapus.
+              This user does not exist or has been deleted.
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
             <Button nativeButton={false} render={<Link href="/users" />}>
-              Kembali ke Users
+              Back to Users
             </Button>
           </EmptyContent>
         </Empty>

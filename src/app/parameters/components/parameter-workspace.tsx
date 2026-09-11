@@ -1,8 +1,10 @@
 "use client"
 
 import { useState } from "react"
+import { PlusIcon } from "lucide-react"
 
 import Heading from "@/components/heading"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import type { Parameter } from "@/db/schema"
 
@@ -28,18 +30,19 @@ export function ParameterWorkspace({
       nextSortOrder={nextSortOrder}
     >
       <div className="flex min-h-0 flex-1 flex-col gap-6 p-4">
-        <Heading
-          variant="small"
-          title="Parameters"
-          description="Kelola parameter referensi yang dipakai lintas modul."
-        />
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <Heading variant="default" title="Parameters" />
+          <Button type="button" onClick={() => setSheet({ type: "create" })}>
+            <PlusIcon data-icon="inline-start" />
+            Add New
+          </Button>
+        </div>
 
         <Card className="gap-0 overflow-hidden py-0">
           <CardContent className="flex flex-col gap-4 p-4">
             <ParameterListTable
               parameters={parameters}
               groups={groups}
-              onCreate={() => setSheet({ type: "create" })}
               onView={(parameter) => setSheet({ type: "view", parameter })}
               onEdit={(parameter) => setSheet({ type: "edit", parameter })}
             />

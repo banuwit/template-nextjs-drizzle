@@ -1,6 +1,6 @@
 "use client"
 
-import { useActionState, useEffect } from "react"
+import { useActionState, useEffect, type ReactNode } from "react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -21,11 +21,15 @@ import type { ParameterActionState, ParameterFormValues } from "../types"
 import { ParameterColorField } from "./parameter-color-field"
 import {
   ParameterSidePanelBody,
-  ParameterSidePanelFooter,
+  ParameterSidePanelDescription,
+  ParameterSidePanelHeader,
+  ParameterSidePanelTitle,
 } from "./parameter-side-panel"
 import { ParameterSwitchField } from "./parameter-switch-field"
 
 export function ParameterForm({
+  title,
+  description,
   action,
   defaultValues,
   groups,
@@ -33,6 +37,8 @@ export function ParameterForm({
   successTitle,
   onClose,
 }: {
+  title: ReactNode
+  description: ReactNode
   action: (
     prevState: ParameterActionState,
     formData: FormData,
@@ -58,7 +64,7 @@ export function ParameterForm({
       type: "success",
       title: successTitle,
       description: state.values
-        ? `${state.values.code} tersimpan.`
+        ? `${state.values.code} saved.`
         : undefined,
     })
     onClose()
@@ -71,10 +77,35 @@ export function ParameterForm({
 
   return (
     <form action={formAction} className="flex min-h-0 flex-1 flex-col">
+      <ParameterSidePanelHeader
+        onClose={onClose}
+        actions={
+          <>
+            <Button type="submit" disabled={pending}>
+              {pending && <Spinner />}
+              {submitLabel}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={pending}
+              onClick={onClose}
+            >
+              Cancel
+            </Button>
+          </>
+        }
+      >
+        <ParameterSidePanelTitle>{title}</ParameterSidePanelTitle>
+        <ParameterSidePanelDescription>
+          {description}
+        </ParameterSidePanelDescription>
+      </ParameterSidePanelHeader>
+
       <ParameterSidePanelBody className="flex flex-col gap-6">
         <FieldGroup>
           <Field data-invalid={errors?.group ? true : undefined}>
-            <FieldLabel htmlFor="parameter-group">Grup</FieldLabel>
+            <FieldLabel htmlFor="parameter-group">Group</FieldLabel>
             <Input
               id="parameter-group"
               name="group"
@@ -91,13 +122,13 @@ export function ParameterForm({
               ))}
             </datalist>
             <FieldDescription>
-              Pengelompokan parameter, mis. `status_order`.
+              Groups related parameters, e.g. `status_order`.
             </FieldDescription>
             <FieldError errors={toFieldErrors(errors?.group)} />
           </Field>
 
           <Field data-invalid={errors?.code ? true : undefined}>
-            <FieldLabel htmlFor="parameter-code">Kode</FieldLabel>
+            <FieldLabel htmlFor="parameter-code">Code</FieldLabel>
             <Input
               id="parameter-code"
               name="code"
@@ -109,17 +140,17 @@ export function ParameterForm({
               className="uppercase"
             />
             <FieldDescription>
-              Unik lintas grup, otomatis diubah ke huruf kapital.
+              Unique across the group, automatically uppercased.
             </FieldDescription>
             <FieldError errors={toFieldErrors(errors?.code)} />
           </Field>
 
           <Field data-invalid={errors?.value ? true : undefined}>
-            <FieldLabel htmlFor="parameter-value">Nilai</FieldLabel>
+            <FieldLabel htmlFor="parameter-value">Value</FieldLabel>
             <Input
               id="parameter-value"
               name="value"
-              placeholder="Sudah dibayar"
+              placeholder="Paid"
               autoComplete="off"
               maxLength={150}
               aria-invalid={errors?.value ? true : undefined}
@@ -129,7 +160,7 @@ export function ParameterForm({
           </Field>
 
           <Field data-invalid={errors?.sortOrder ? true : undefined}>
-            <FieldLabel htmlFor="parameter-sort-order">Urutan</FieldLabel>
+            <FieldLabel htmlFor="parameter-sort-order">Order</FieldLabel>
             <Input
               id="parameter-sort-order"
               name="sortOrder"
@@ -145,12 +176,12 @@ export function ParameterForm({
           </Field>
 
           <Field data-invalid={errors?.description ? true : undefined}>
-            <FieldLabel htmlFor="parameter-description">Deskripsi</FieldLabel>
+            <FieldLabel htmlFor="parameter-description">Description</FieldLabel>
             <Textarea
               id="parameter-description"
               name="description"
               rows={3}
-              placeholder="Opsional"
+              placeholder="Optional"
               aria-invalid={errors?.description ? true : undefined}
               defaultValue={
                 values?.description ?? defaultValues?.description ?? ""
@@ -163,7 +194,7 @@ export function ParameterForm({
             <ParameterColorField
               id="parameter-text-color"
               name="textColor"
-              label="Warna teks"
+              label="Text color"
               fallback="#111827"
               defaultValue={values?.textColor ?? defaultValues?.textColor}
               errors={errors?.textColor}
@@ -171,7 +202,7 @@ export function ParameterForm({
             <ParameterColorField
               id="parameter-bg-color"
               name="bgColor"
-              label="Warna latar"
+              label="Background color"
               fallback="#E5E7EB"
               defaultValue={values?.bgColor ?? defaultValues?.bgColor}
               errors={errors?.bgColor}
@@ -192,7 +223,7 @@ export function ParameterForm({
               className="font-mono text-xs"
             />
             <FieldDescription>
-              Objek JSON opsional. Kosongkan kalau tidak dipakai.
+              Optional JSON object. Leave empty if not used.
             </FieldDescription>
             <FieldError errors={toFieldErrors(errors?.attributes)} />
           </Field>
@@ -201,8 +232,8 @@ export function ParameterForm({
             <ParameterSwitchField
               id="parameter-is-active"
               name="isActive"
-              label="Aktif"
-              description="Parameter nonaktif tetap tersimpan tapi tidak dipakai."
+              label="Active"
+              description="Inactive parameters stay saved but are not used."
               defaultChecked={
                 values?.isActive ?? defaultValues?.isActive ?? true
               }
@@ -210,8 +241,8 @@ export function ParameterForm({
             <ParameterSwitchField
               id="parameter-is-system"
               name="isSystem"
-              label="Parameter sistem"
-              description="Dipakai kode aplikasi; tidak bisa dihapus."
+              label="System parameter"
+              description="Used by application code; cannot be deleted."
               defaultChecked={
                 values?.isSystem ?? defaultValues?.isSystem ?? false
               }
@@ -221,21 +252,6 @@ export function ParameterForm({
 
         <FieldError errors={toFieldErrors(errors?.form)} />
       </ParameterSidePanelBody>
-
-      <ParameterSidePanelFooter>
-        <Button type="submit" disabled={pending}>
-          {pending && <Spinner />}
-          {submitLabel}
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          disabled={pending}
-          onClick={onClose}
-        >
-          Batal
-        </Button>
-      </ParameterSidePanelFooter>
     </form>
   )
 }

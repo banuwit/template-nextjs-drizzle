@@ -11,7 +11,7 @@ import { deleteUser } from "../actions"
  * dan notifikasi hasil. Dipisah dari komponen supaya markup dialog tetap tipis
  * dan alur yang sama gampang dipakai ulang (mis. tombol hapus di halaman detail).
  */
-export function useDeleteUser(user: { id: number; name: string }) {
+export function useDeleteUser(user: { id: string; name: string }) {
   const [confirmOpen, setConfirmOpen] = React.useState(false)
   const [pending, startTransition] = React.useTransition()
 

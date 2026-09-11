@@ -3,7 +3,6 @@
 import { createColumnHelper, sortFn_datetime } from "@tanstack/react-table"
 import type { ColumnDef, FilterFn } from "@tanstack/react-table"
 import { format } from "date-fns"
-import { PlusIcon } from "lucide-react"
 
 import { DataGridClient } from "@/components/data-grid/data-grid-client"
 import type { DataGridFeatures } from "@/components/data-grid/data-grid-features"
@@ -11,19 +10,15 @@ import { DataGridHeader } from "@/components/data-grid/data-grid-header"
 import { DataGridHeaderSort } from "@/components/data-grid/data-grid-header-sort"
 import type { ToolbarConfig } from "@/components/data-grid/types"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import type { Parameter } from "@/db/schema"
 
 import { ParameterRowActions } from "./parameter-row-actions"
 import { ParameterValueBadge } from "./parameter-value-badge"
 
 /**
- * Satu kotak pencarian mencakup grup/kode/nilai/deskripsi sekaligus — persis
- * UX versi `DataTableServer` sebelumnya. `DataGridClient` memetakan kotak
- * pencarian ke SATU kolom (`table.getColumn(key)?.setFilterValue(...)`), jadi
- * filter gabungan ini ditempel ke kolom "Kode": `filterFn`-nya mengabaikan
- * `getValue()` dan membaca `row.original` langsung, sedangkan accessor kolom
- * tetap `code` supaya sortir kolomnya tidak ikut berubah.
+ * Kotak pencarian hanya menyaring kolom "Nilai". `DataGridClient` memetakan
+ * kotak pencarian ke SATU kolom (`table.getColumn(key)?.setFilterValue(...)`),
+ * jadi `filterFn` ini ditempel langsung ke kolom `value`.
  */
 const matchesSearch: FilterFn<DataGridFeatures, Parameter> = (
   row,
@@ -34,18 +29,9 @@ const matchesSearch: FilterFn<DataGridFeatures, Parameter> = (
     return true
   }
 
-  const parameter = row.original
-  const haystack = [
-    parameter.group,
-    parameter.code,
-    parameter.value,
-    parameter.description,
-  ]
-    .filter((part): part is string => Boolean(part))
-    .join(" ")
-    .toLowerCase()
+  const value = row.original.value
 
-  return haystack.includes(filterValue.toLowerCase())
+  return Boolean(value?.toLowerCase().includes(filterValue.toLowerCase()))
 }
 matchesSearch.autoRemove = (value) => !value
 
@@ -92,8 +78,22 @@ function buildColumns({
   onEdit: (parameter: Parameter) => void
 }): ColumnDef<DataGridFeatures, Parameter>[] {
   return columnHelper.columns([
+    columnHelper.display({
+      id: "no",
+      header: () => <DataGridHeader title="No." />,
+      enableHiding: false,
+      cell: ({ row, table }) => {
+        const { pageIndex, pageSize } = table.store.state.pagination
+
+        return (
+          <span className="text-muted-foreground tabular-nums">
+            {pageIndex * pageSize + row.getDisplayIndex() + 1}
+          </span>
+        )
+      },
+    }),
     columnHelper.accessor("group", {
-      header: ({ column }) => <DataGridHeaderSort column={column} title="Grup" />,
+      header: ({ column }) => <DataGridHeaderSort column={column} title="Group" />,
       cell: ({ row }) => (
         <span className="font-mono text-xs text-muted-foreground">
           {row.original.group}
@@ -103,7 +103,7 @@ function buildColumns({
       filterFn: "multiValue",
     }),
     columnHelper.accessor("code", {
-      header: ({ column }) => <DataGridHeaderSort column={column} title="Kode" />,
+      header: ({ column }) => <DataGridHeaderSort column={column} title="Code" />,
       cell: ({ row }) => (
         <button
           type="button"
@@ -113,11 +113,11 @@ function buildColumns({
           {row.original.code}
         </button>
       ),
-      filterFn: matchesSearch,
     }),
     columnHelper.accessor("value", {
-      header: ({ column }) => <DataGridHeaderSort column={column} title="Nilai" />,
+      header: ({ column }) => <DataGridHeaderSort column={column} title="Value" />,
       cell: ({ row }) => <ParameterValueBadge parameter={row.original} />,
+      filterFn: matchesSearch,
     }),
     columnHelper.display({
       id: "status",
@@ -127,16 +127,16 @@ function buildColumns({
       cell: ({ row }) => (
         <div className="flex flex-wrap items-center gap-1.5">
           <Badge variant={row.original.isActive ? "default" : "secondary"}>
-            {row.original.isActive ? "Aktif" : "Nonaktif"}
+            {row.original.isActive ? "Active" : "Inactive"}
           </Badge>
-          {row.original.isSystem && <Badge variant="outline">Sistem</Badge>}
+          {row.original.isSystem && <Badge variant="outline">System</Badge>}
         </div>
       ),
     }),
     columnHelper.accessor("sortOrder", {
       id: "sort_order",
       header: ({ column }) => (
-        <DataGridHeaderSort column={column} title="Urutan" className="justify-end" />
+        <DataGridHeaderSort column={column} title="Order" className="justify-end" />
       ),
       cell: ({ row }) => (
         <span className="block text-right tabular-nums text-muted-foreground">
@@ -147,7 +147,7 @@ function buildColumns({
     columnHelper.accessor("createdAt", {
       id: "created_at",
       header: ({ column }) => (
-        <DataGridHeaderSort column={column} title="Dibuat" className="justify-end" />
+        <DataGridHeaderSort column={column} title="Created" className="justify-end" />
       ),
       // "auto" mendeteksi kolom bertipe Date sebagai `datetime`, tapi cuma
       // `alphanumeric`/`text` yang didaftarkan di `data-grid-features.ts` —
@@ -178,31 +178,29 @@ function buildColumns({
 export function ParameterListTable({
   parameters,
   groups,
-  onCreate,
   onView,
   onEdit,
 }: {
   parameters: Parameter[]
   groups: string[]
-  onCreate: () => void
   onView: (parameter: Parameter) => void
   onEdit: (parameter: Parameter) => void
 }) {
   const toolbar: ToolbarConfig = {
-    searches: [{ key: "code", placeholder: "Cari kode, nilai, grup..." }],
+    searches: [{ key: "value", placeholder: "Search by value..." }],
     facets: [
       {
         key: "group",
-        title: "Grup",
+        title: "Group",
         options: groups.map((group) => ({ label: group, value: group })),
       },
       {
         key: "status",
         title: "Status",
         options: [
-          { label: "Aktif", value: "active" },
-          { label: "Nonaktif", value: "inactive" },
-          { label: "Sistem", value: "system" },
+          { label: "Active", value: "active" },
+          { label: "Inactive", value: "inactive" },
+          { label: "System", value: "system" },
         ],
       },
     ],
@@ -215,16 +213,10 @@ export function ParameterListTable({
       getRowId={(row) => String(row.id)}
       defaultSorting={[{ id: "sort_order", desc: false }]}
       toolbar={toolbar}
-      actions={
-        <Button type="button" onClick={onCreate}>
-          <PlusIcon data-icon="inline-start" />
-          Parameter baru
-        </Button>
-      }
-      emptyTitle="Belum ada parameter."
-      emptyDescription="Tambahkan parameter pertama lewat tombol Parameter baru."
-      emptyFilteredTitle="Tidak ada parameter yang cocok dengan filter ini."
-      emptyFilteredDescription="Ubah kata kunci atau bersihkan filter."
+      emptyTitle="No parameters found."
+      emptyDescription="Add the first parameter through the Add New button."
+      emptyFilteredTitle="No parameters found matching this filter."
+      emptyFilteredDescription="Change the search term or clear the filter."
     />
   )
 }

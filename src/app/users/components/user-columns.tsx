@@ -57,7 +57,7 @@ export const userColumns = columnHelper.columns([
   }),
   columnHelper.accessor("name", {
     header: ({ column }) => (
-      <DataGridHeaderDropdown column={column} title="Nama" />
+      <DataGridHeaderDropdown column={column} title="Name" />
     ),
     cell: ({ row }) => <NameCell user={row.original} />,
   }),
@@ -72,7 +72,7 @@ export const userColumns = columnHelper.columns([
   columnHelper.accessor("createdAt", {
     id: "created_at",
     header: ({ column }) => (
-      <DataGridHeaderDropdown column={column} title="Dibuat" />
+      <DataGridHeaderDropdown column={column} title="Created" />
     ),
     cell: ({ row }) => (
       <span className="text-muted-foreground">

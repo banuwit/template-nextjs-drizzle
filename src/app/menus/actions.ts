@@ -7,15 +7,15 @@ import { z } from "zod"
 import { db } from "@/db"
 import { menus } from "@/db/schema"
 import { isUniqueViolation } from "@/lib/db-errors"
+import { requireUser } from "@/lib/session"
 import { menuFormSchema, slugify } from "@/lib/validations/menu"
 
 import { getMenuLevel, listMenuSubtreeIds } from "./queries"
 import type { MenuActionState, MenuFormFields } from "./types"
 
 /**
- * Kolom audit (`createdBy` / `updatedBy` / `deletedBy`) sengaja dibiarkan null:
- * project ini belum punya sesi auth, jadi tidak ada user id yang bisa dicatat.
- * Kolomnya sudah ada di schema — tinggal diisi begitu auth dipasang.
+ * Kolom audit (`createdBy` / `updatedBy` / `deletedBy`) diisi uuid user yang
+ * login, dari `requireUser()`. Semua id menu di file ini = uuid.
  */
 
 /** Switch yang mati TIDAK terkirim di FormData; form ini selalu mengirim
@@ -47,7 +47,7 @@ function parseMenuForm(formData: FormData): ParseResult {
     icon: readNullableString(formData, "icon"),
     routeName: readNullableString(formData, "routeName"),
     routePattern: readNullableString(formData, "routePattern"),
-    parentId: parentRaw === "" ? null : Number(parentRaw),
+    parentId: parentRaw === "" ? null : parentRaw,
     sortOrder: sortOrderRaw === "" ? 0 : Number(sortOrderRaw),
     layout: String(formData.get("layout") ?? "").trim() || "sidebar",
     isActive: readBoolean(formData, "isActive"),
@@ -75,7 +75,7 @@ const SLUG_TAKEN: MenuActionState["errors"] = {
  * render) mengikuti migrasi aslinya, tapi sumber kebenarannya tetap `parent_id`.
  */
 async function resolveLevel(
-  parentId: number | null,
+  parentId: string | null,
 ): Promise<{ ok: true; level: number } | { ok: false; state: MenuActionState }> {
   if (parentId === null) {
     return { ok: true, level: 0 }
@@ -97,13 +97,13 @@ async function resolveLevel(
  * Menyamakan kembali `level` seluruh turunan sebuah menu setelah induknya
  * berpindah. Tanpa ini, memindahkan cabang membuat level anak-anaknya basi.
  */
-async function relevelDescendants(rootId: number, rootLevel: number) {
+async function relevelDescendants(rootId: string, rootLevel: number) {
   const rows = await db
     .select({ id: menus.id, parentId: menus.parentId, level: menus.level })
     .from(menus)
     .where(isNull(menus.deletedAt))
 
-  const childrenOf = new Map<number, typeof rows>()
+  const childrenOf = new Map<string, typeof rows>()
 
   rows.forEach((row) => {
     if (row.parentId === null) return
@@ -113,13 +113,13 @@ async function relevelDescendants(rootId: number, rootLevel: number) {
     ])
   })
 
-  const queue: { id: number; level: number }[] = [
+  const queue: { id: string; level: number }[] = [
     { id: rootId, level: rootLevel },
   ]
-  const updates: { id: number; level: number }[] = []
+  const updates: { id: string; level: number }[] = []
 
   while (queue.length > 0) {
-    const current = queue.shift() as { id: number; level: number }
+    const current = queue.shift() as { id: string; level: number }
 
     for (const child of childrenOf.get(current.id) ?? []) {
       const level = current.level + 1
@@ -144,6 +144,8 @@ export async function createMenu(
   _prevState: MenuActionState,
   formData: FormData,
 ): Promise<MenuActionState> {
+  const user = await requireUser()
+
   const parsed = parseMenuForm(formData)
 
   if (!parsed.ok) {
@@ -157,7 +159,12 @@ export async function createMenu(
   }
 
   try {
-    await db.insert(menus).values({ ...parsed.data, level: level.level })
+    await db.insert(menus).values({
+      ...parsed.data,
+      level: level.level,
+      createdBy: user.id,
+      updatedBy: user.id,
+    })
   } catch (error) {
     if (isUniqueViolation(error)) {
       return { errors: SLUG_TAKEN, values: parsed.data }
@@ -170,10 +177,12 @@ export async function createMenu(
 }
 
 export async function updateMenu(
-  id: number,
+  id: string,
   _prevState: MenuActionState,
   formData: FormData,
 ): Promise<MenuActionState> {
+  const user = await requireUser()
+
   const parsed = parseMenuForm(formData)
 
   if (!parsed.ok) {
@@ -210,7 +219,7 @@ export async function updateMenu(
   try {
     await db
       .update(menus)
-      .set({ ...parsed.data, level: level.level })
+      .set({ ...parsed.data, level: level.level, updatedBy: user.id })
       .where(and(eq(menus.id, id), isNull(menus.deletedAt)))
   } catch (error) {
     if (isUniqueViolation(error)) {
@@ -230,7 +239,9 @@ export async function updateMenu(
  * ditandai — FK `ON DELETE CASCADE` hanya berlaku untuk hapus fisik, jadi tanpa
  * ini anak-anaknya jadi yatim dan menunjuk induk yang sudah hilang.
  */
-export async function deleteMenu(id: number): Promise<void> {
+export async function deleteMenu(id: string): Promise<void> {
+  const user = await requireUser()
+
   const ids = await listMenuSubtreeIds(id)
 
   if (ids.length === 0) {
@@ -239,7 +250,7 @@ export async function deleteMenu(id: number): Promise<void> {
 
   await db
     .update(menus)
-    .set({ deletedAt: new Date() })
+    .set({ deletedAt: new Date(), deletedBy: user.id })
     .where(and(inArray(menus.id, ids), isNull(menus.deletedAt)))
 
   revalidatePath("/menus")

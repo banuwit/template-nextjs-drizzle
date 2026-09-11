@@ -18,6 +18,7 @@ import { alias } from "drizzle-orm/pg-core"
 import { db } from "@/db"
 import { menus, type Menu } from "@/db/schema"
 import { paginate } from "@/lib/pagination"
+import { requireUser } from "@/lib/session"
 import type { Paginated } from "@/types/pagination"
 
 import type { MenuListParams, MenuListRow, MenuParentOption } from "./types"
@@ -49,16 +50,12 @@ export async function listMenus({
   page,
   perPage,
 }: MenuListParams): Promise<Paginated<MenuListRow>> {
+  await requireUser()
+
   const clauses: SQL[] = [notDeleted]
 
   if (search) {
-    const like = `%${search}%`
-    const match = or(
-      ilike(menus.name, like),
-      ilike(menus.slug, like),
-      ilike(menus.routeName, like),
-    )
-    if (match) clauses.push(match)
+    clauses.push(ilike(menus.name, `%${search}%`))
   }
 
   if (layouts.length > 0) {
@@ -95,7 +92,7 @@ export async function listMenus({
         and(eq(menus.parentId, parents.id), isNull(parents.deletedAt)),
       )
       .where(where)
-      .orderBy(order, asc(menus.id))
+      .orderBy(order, asc(menus.internalId))
       .limit(perPage)
       .offset((page - 1) * perPage),
     db.select({ value: count() }).from(menus).where(where),
@@ -106,6 +103,8 @@ export async function listMenus({
 
 /** Layout yang benar-benar dipakai, untuk opsi facet dan datalist form. */
 export async function listMenuLayouts(): Promise<string[]> {
+  await requireUser()
+
   const rows = await db
     .selectDistinct({ layout: menus.layout })
     .from(menus)
@@ -123,6 +122,8 @@ export async function listMenuLayouts(): Promise<string[]> {
  * `actions.ts`.
  */
 export async function listMenuParentOptions(): Promise<MenuParentOption[]> {
+  await requireUser()
+
   const rows = await db
     .select({
       id: menus.id,
@@ -133,9 +134,9 @@ export async function listMenuParentOptions(): Promise<MenuParentOption[]> {
     })
     .from(menus)
     .where(notDeleted)
-    .orderBy(asc(menus.sortOrder), asc(menus.id))
+    .orderBy(asc(menus.sortOrder), asc(menus.internalId))
 
-  const childrenOf = new Map<number | null, typeof rows>()
+  const childrenOf = new Map<string | null, typeof rows>()
 
   rows.forEach((row) => {
     const siblings = childrenOf.get(row.parentId) ?? []
@@ -145,7 +146,7 @@ export async function listMenuParentOptions(): Promise<MenuParentOption[]> {
 
   const ordered: MenuParentOption[] = []
 
-  function walk(parentId: number | null, depth: number) {
+  function walk(parentId: string | null, depth: number) {
     for (const row of childrenOf.get(parentId) ?? []) {
       ordered.push({
         id: row.id,
@@ -178,6 +179,8 @@ export async function listMenuParentOptions(): Promise<MenuParentOption[]> {
 
 /** Urutan berikutnya dalam satu layout, dipakai sebagai default form create. */
 export async function nextMenuSortOrder(): Promise<number> {
+  await requireUser()
+
   const [row] = await db
     .select({ max: sql<number | null>`max(${menus.sortOrder})` })
     .from(menus)
@@ -194,13 +197,15 @@ export type MenuTreeNode = Menu & { children: MenuTreeNode[] }
  * halaman mana pun; disediakan supaya konsumen tidak menulis query sendiri.
  */
 export async function listMenuTree(layout = "sidebar"): Promise<MenuTreeNode[]> {
+  await requireUser()
+
   const rows = await db
     .select()
     .from(menus)
     .where(and(notDeleted, eq(menus.isActive, true), eq(menus.layout, layout)))
-    .orderBy(asc(menus.sortOrder), asc(menus.id))
+    .orderBy(asc(menus.sortOrder), asc(menus.internalId))
 
-  const nodes = new Map<number, MenuTreeNode>(
+  const nodes = new Map<string, MenuTreeNode>(
     rows.map((row) => [row.id, { ...row, children: [] }]),
   )
   const roots: MenuTreeNode[] = []
@@ -227,13 +232,15 @@ export async function listMenuTree(layout = "sidebar"): Promise<MenuTreeNode[]> 
  * Ditelusuri di memori, bukan lewat recursive CTE: tabel menu berukuran puluhan
  * baris dan ini jauh lebih mudah dibaca.
  */
-export async function listMenuSubtreeIds(id: number): Promise<number[]> {
+export async function listMenuSubtreeIds(id: string): Promise<string[]> {
+  await requireUser()
+
   const rows = await db
     .select({ id: menus.id, parentId: menus.parentId })
     .from(menus)
     .where(notDeleted)
 
-  const childrenOf = new Map<number, number[]>()
+  const childrenOf = new Map<string, string[]>()
 
   rows.forEach((row) => {
     if (row.parentId === null) return
@@ -249,11 +256,11 @@ export async function listMenuSubtreeIds(id: number): Promise<number[]> {
     return []
   }
 
-  const collected: number[] = []
+  const collected: string[] = []
   const queue = [id]
 
   while (queue.length > 0) {
-    const current = queue.shift() as number
+    const current = queue.shift() as string
 
     if (collected.includes(current)) continue
 
@@ -265,7 +272,9 @@ export async function listMenuSubtreeIds(id: number): Promise<number[]> {
 }
 
 /** Level induk, untuk menurunkan `level` baris anak. */
-export async function getMenuLevel(id: number): Promise<number | null> {
+export async function getMenuLevel(id: string): Promise<number | null> {
+  await requireUser()
+
   const [row] = await db
     .select({ level: menus.level })
     .from(menus)

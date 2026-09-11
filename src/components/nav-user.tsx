@@ -1,10 +1,15 @@
 "use client"
 
+import { useState, useTransition } from "react"
+
+import { signOut } from "@/app/auth/actions"
+import { AuthChangePasswordDialog } from "@/app/auth/components/auth-change-password-dialog"
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,98 +19,83 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
-} from "@/components/ui/sidebar"
-import { ChevronsUpDownIcon, SparklesIcon, BadgeCheckIcon, CreditCardIcon, BellIcon, LogOutIcon } from "lucide-react"
+import type { CurrentUser } from "@/lib/session"
+import { getInitials } from "@/lib/initials"
+import { BadgeCheckIcon, LogOutIcon, KeyIcon } from "lucide-react"
 
-export function NavUser({
-  user,
-}: {
-  user: {
-    name: string
-    email: string
-    avatar: string
-  }
-}) {
-  const { isMobile } = useSidebar()
+export function NavUser({ user }: { user: CurrentUser }) {
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false)
+  const [signingOut, startSignOut] = useTransition()
+  const initials = getInitials(user.name)
+
   return (
-    <SidebarMenu>
-      <SidebarMenuItem>
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <SidebarMenuButton size="lg" className="aria-expanded:bg-muted" />
-            }
-          >
-            <Avatar>
-              <AvatarImage src={user.avatar} alt={user.name} />
-              <AvatarFallback>CN</AvatarFallback>
-            </Avatar>
-            <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-medium">{user.name}</span>
-              <span className="truncate text-xs">{user.email}</span>
-            </div>
-            <ChevronsUpDownIcon className="ml-auto size-4" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="w-fit"
-            side={isMobile ? "bottom" : "right"}
-            align="end"
-            sideOffset={4}
-          >
-            <DropdownMenuGroup>
-              <DropdownMenuLabel className="p-0 font-normal">
-                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                  <Avatar>
-                    <AvatarImage src={user.avatar} alt={user.name} />
-                    <AvatarFallback>CN</AvatarFallback>
-                  </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-medium">{user.name}</span>
-                    <span className="truncate text-xs">{user.email}</span>
-                  </div>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              variant="ghost"
+              className="h-8 gap-1.5 px-0 rounded-full aria-expanded:bg-muted"
+            />
+          }
+        >
+          <Avatar className="size-8">
+            {user.image && <AvatarImage src={user.image} alt={user.name} />}
+            <AvatarFallback>{initials}</AvatarFallback>
+          </Avatar>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          className="w-56"
+          side="bottom"
+          align="end"
+          sideOffset={8}
+        >
+          <DropdownMenuGroup>
+            <DropdownMenuLabel className="p-0 font-normal">
+              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                <Avatar className="size-8">
+                  {user.image && (
+                    <AvatarImage src={user.image} alt={user.name} />
+                  )}
+                  <AvatarFallback>{initials}</AvatarFallback>
+                </Avatar>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-medium">{user.name}</span>
+                  <span className="truncate text-xs text-muted-foreground">
+                    {user.email}
+                  </span>
                 </div>
-              </DropdownMenuLabel>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <SparklesIcon
-                />
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheckIcon
-                />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCardIcon
-                />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <BellIcon
-                />
-                Notifications
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
+              </div>
+            </DropdownMenuLabel>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
             <DropdownMenuItem>
-              <LogOutIcon
-              />
-              Log out
+              <BadgeCheckIcon />
+              Account
             </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SidebarMenuItem>
-    </SidebarMenu>
+            <DropdownMenuItem onClick={() => setChangePasswordOpen(true)}>
+              <KeyIcon />
+              Change Password
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            variant="destructive"
+            disabled={signingOut}
+            onClick={() => startSignOut(() => signOut())}
+          >
+            <LogOutIcon />
+            Log out
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {changePasswordOpen && (
+        <AuthChangePasswordDialog
+          onClose={() => setChangePasswordOpen(false)}
+        />
+      )}
+    </>
   )
 }
