@@ -40,3 +40,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Claude Code local stubs (symlinks; source of truth is AGENTS.md / .agents/)
+.claude
+CLAUDE.md
+
