@@ -19,12 +19,27 @@ export const metadata: Metadata = {
   description: siteConfig.description,
 };
 
+// Default tema adalah light (tanpa class `dark`); hanya jalan kalau user
+// pernah memilih dark lewat `ThemeToggle`. Inline & sinkron supaya class
+// `dark` sudah terpasang sebelum paint pertama — tidak ada flash light→dark.
+const themeScript = `
+  try {
+    if (localStorage.getItem("theme") === "dark") {
+      document.documentElement.classList.add("dark")
+    }
+  } catch (e) {}
+`;
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
       className={cn("h-full", "antialiased", geistMono.variable, "font-sans", inter.variable, geistHeading.variable)}
+      suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className="min-h-full flex flex-col">
         <Toaster>{children}</Toaster>
       </body>

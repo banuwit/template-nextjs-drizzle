@@ -30,7 +30,7 @@ export function ProvinceWorkspace({
   return (
     <>
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <Heading variant="small" title="Provinces" />
+        <Heading title="Provinces" />
         <Button
           type="button"
           onClick={() => {

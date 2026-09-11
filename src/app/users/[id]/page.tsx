@@ -39,7 +39,7 @@ export default async function UserDetailPage({
     >
       <div className="flex h-full min-w-0 flex-1 flex-col gap-6 p-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <Heading variant="small" title={user.name} />
+          <Heading title={user.name} />
           <div className="flex items-center gap-2">
             <Button
               variant="outline"

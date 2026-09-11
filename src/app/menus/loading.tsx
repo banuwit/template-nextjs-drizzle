@@ -7,14 +7,14 @@ export default function MenusLoading() {
   return (
     <AppLayout breadcrumbs={[{ label: "Menus" }]}>
       <div className="flex h-full min-w-0 flex-1 flex-col gap-6 p-4">
-        <Heading variant="small" title="Menus" />
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <Heading title="Menus" />
+          <Skeleton className="h-9 w-32" />
+        </div>
 
         <Card className="gap-0 overflow-hidden py-0">
           <CardContent className="flex flex-col gap-4 p-4">
-            <div className="flex items-center justify-between gap-2">
-              <Skeleton className="h-9 w-full max-w-sm" />
-              <Skeleton className="h-9 w-32" />
-            </div>
+            <Skeleton className="h-9 w-full max-w-sm" />
             <Skeleton className="h-64 w-full" />
             <Skeleton className="h-8 w-full" />
           </CardContent>

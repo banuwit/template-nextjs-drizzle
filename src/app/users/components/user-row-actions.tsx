@@ -49,7 +49,6 @@ export function UserRowActions({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuGroup>
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem render={<Link href={`/users/${user.id}`} />}>
               <EyeIcon />
               View

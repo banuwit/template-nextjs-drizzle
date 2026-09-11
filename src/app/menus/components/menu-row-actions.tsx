@@ -53,7 +53,6 @@ export function MenuRowActions({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuGroup>
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem onClick={() => onView(menu)}>
               <EyeIcon />
               View

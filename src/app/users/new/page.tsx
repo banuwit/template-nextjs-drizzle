@@ -17,7 +17,7 @@ export default function NewUserPage() {
       breadcrumbs={[{ label: "Users", href: "/users" }, { label: "Add New" }]}
     >
       <div className="flex h-full min-w-0 flex-1 flex-col gap-6 p-4">
-        <Heading variant="small" title="Add New User" />
+        <Heading title="Add New User" />
 
         <Card className="max-w-xl">
           <CardContent>

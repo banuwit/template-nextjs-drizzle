@@ -22,7 +22,7 @@ export default function UserNotFound() {
       ]}
     >
       <div className="flex h-full min-w-0 flex-1 flex-col gap-6 p-4">
-        <Heading variant="small" title="Not found" />
+        <Heading title="Not found" />
         <Empty className="flex-1 border">
           <EmptyHeader>
             <EmptyMedia variant="icon">

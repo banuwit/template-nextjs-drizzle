@@ -11,7 +11,7 @@ export default function Page() {
   return (
     <AppLayout breadcrumbs={[{ label: "Dashboard" }]}>
       <div className="flex min-w-0 flex-1 flex-col gap-4 p-4">
-        <Heading variant="small" title="Dashboard" />
+        <Heading title="Dashboard" />
         <div className="grid auto-rows-min gap-4 md:grid-cols-3">
           <div className="aspect-video rounded-xl bg-card border" />
           <div className="aspect-video rounded-xl bg-card border" />

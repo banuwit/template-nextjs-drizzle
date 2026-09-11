@@ -30,7 +30,7 @@ export function CityWorkspace({
   return (
     <>
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <Heading variant="small" title="Cities" />
+        <Heading title="Cities" />
         <Button
           type="button"
           onClick={() => {

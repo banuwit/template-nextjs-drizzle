@@ -53,7 +53,6 @@ export function ParameterRowActions({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuGroup>
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem onClick={() => onView(parameter)}>
               <EyeIcon />
               View

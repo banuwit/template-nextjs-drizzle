@@ -1,7 +1,7 @@
 "use client"
 
 import { format } from "date-fns"
-import { CornerDownRightIcon, PlusIcon } from "lucide-react"
+import { CornerDownRightIcon } from "lucide-react"
 
 import { DataTableServer } from "@/components/data-table/data-table-server"
 import type {
@@ -9,7 +9,6 @@ import type {
   DataTableFilters,
 } from "@/components/data-table/types"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import type { Paginated } from "@/types/pagination"
 
 import type { MenuListRow } from "../types"
@@ -151,14 +150,12 @@ export function MenuListTable({
   paginated,
   filters,
   layouts,
-  onCreate,
   onView,
   onEdit,
 }: {
   paginated: Paginated<MenuListRow>
   filters: DataTableFilters
   layouts: string[]
-  onCreate: () => void
   onView: (menu: MenuListRow) => void
   onEdit: (menu: MenuListRow) => void
 }) {
@@ -196,12 +193,6 @@ export function MenuListTable({
           },
         ],
       }}
-      actions={
-        <Button type="button" onClick={onCreate}>
-          <PlusIcon data-icon="inline-start" />
-          Add New
-        </Button>
-      }
       emptyTitle="No menus found."
       emptyDescription="Add the first menu through the Add New button."
       emptyFilteredTitle="No menus found matching this filter."

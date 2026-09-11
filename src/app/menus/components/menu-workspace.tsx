@@ -1,9 +1,11 @@
 "use client"
 
 import { useState } from "react"
+import { PlusIcon } from "lucide-react"
 
 import type { DataTableFilters } from "@/components/data-table/types"
 import Heading from "@/components/heading"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import type { Paginated } from "@/types/pagination"
 
@@ -39,7 +41,19 @@ export function MenuWorkspace({
 
   return (
     <>
-      <Heading variant="small" title="Menus" />
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <Heading title="Menus" />
+        <Button
+          type="button"
+          onClick={() => {
+            setSelected(undefined)
+            setMode("create")
+          }}
+        >
+          <PlusIcon data-icon="inline-start" />
+          Add New
+        </Button>
+      </div>
 
       <Card className="gap-0 overflow-hidden py-0">
         <CardContent className="flex flex-col gap-4 p-4">
@@ -47,10 +61,6 @@ export function MenuWorkspace({
             paginated={paginated}
             filters={filters}
             layouts={layouts}
-            onCreate={() => {
-              setSelected(undefined)
-              setMode("create")
-            }}
             onView={(menu) => {
               setSelected(menu)
               setMode("view")
